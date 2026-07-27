@@ -8,7 +8,7 @@ from brainflow.data_filter import DataFilter
 from configs.constants import IS_SYNTHETIC_BOARD, SERIAL_PORT_LINUX, MARKER_START_ACTIVITY, MARKER_END_ACTIVITY
 
 from ..utils.tfrecord_utils import get_all_files
-
+from ..core.enums import RecordingState, ActivityState
 
 class Source():
     BOARDID = BoardIds.SYNTHETIC_BOARD if IS_SYNTHETIC_BOARD else BoardIds.CYTON_BOARD
@@ -37,10 +37,36 @@ class Source():
         self.turn_off_srb(self.board)
         self.logger.info("SOURCE: Board initialized and SRB channels turned-off")
 
-        self.is_recording = False
-        self.is_active = False
+        self.recording_state = RecordingState.IDLE
+        self.activity_state = ActivityState.INACTIVE
 
         self.emg_recording = []
+
+    def start_recording(self) -> None:
+        if self.recording_state is RecordingState.RECORDING:
+            raise RuntimeError("Recording has already started")
+        
+        self.recording_state = RecordingState.RECORDING
+
+    def stop_recording(self) -> None:
+        if self.recording_state is RecordingState.IDLE:
+            raise RuntimeError("Recording has already stopped")
+        
+        self.recording_state = RecordingState.IDLE
+
+    def insert_start_marker(self) -> None:
+        if self.activity_state is ActivityState.ACTIVE:
+            raise RuntimeError("Activity has already started")
+
+        self.board.insert_marker(MARKER_START_ACTIVITY)
+        self.activity_state = ActivityState.ACTIVE
+
+    def insert_stop_marker(self) -> None:
+        if self.activity_state is ActivityState.INACTIVE:
+            raise RuntimeError("Activity has already stopped")
+
+        self.board.insert_marker(MARKER_END_ACTIVITY)
+        self.activity_state = ActivityState.INACTIVE
 
     @staticmethod
     def get_emg_channels():
@@ -71,7 +97,8 @@ class Source():
     def get_data(self, num_of_samples_expctd) -> np.ndarray:
         board_data = self.board.get_board_data(num_samples=num_of_samples_expctd)
         emg_data = board_data[self.emg_channels, :]
-        self.emg_recording.append(emg_data) if self.is_recording else None
+        if self.recording_state is RecordingState.RECORDING:
+            self.emg_recording.append(emg_data)
         num_of_sampl_recvd = board_data.shape[-1]
         self.logger.info(f"SOURCE: Received data per channel from board: {num_of_sampl_recvd}, requested: {num_of_samples_expctd}")
         if num_of_sampl_recvd == num_of_samples_expctd:
@@ -86,16 +113,6 @@ class Source():
         self.board.stop_stream()
         self.board.release_session()
         self.logger.info("SOURCE: OpenBCI Stream closed successfully")
-
-    def flip_recording_flag(self) -> None:
-        self.is_recording = not self.is_recording
-
-    def flip_activity_flag(self) -> None:
-        if not self.is_active:
-            self.board.insert_marker(MARKER_START_ACTIVITY)
-        else:
-            self.board.insert_marker(MARKER_END_ACTIVITY)
-        self.is_active = not self.is_active
 
     def write_to_disk(self, type, label) -> None:
         emg_numpy = np.concatenate(self.emg_recording, axis=1)
