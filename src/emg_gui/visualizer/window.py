@@ -7,14 +7,14 @@ from PyQt5.QtWidgets import (QAction, QApplication, QLabel, QMenu,
                              QOpenGLWidget, QPushButton, QShortcut,
                              QToolButton)
 
-from configs.constants import (FRAME_RATE, GUI_HEIGHT, GUI_WIDTH, HOP_SIZE,
+from emg_gui.configs.constants import (FRAME_RATE, GUI_HEIGHT, GUI_WIDTH, HOP_SIZE,
                                SPECTROGRAM_WINDOW)
 
-from ..utils.tfrecord_utils import get_all_labels
-from .source import Source
-from .spec import Spec
-from .time_series import Wave
-from ..core.enums import RecordingState, ActivityState
+from emg_gui.utils.tfrecord_utils import get_all_labels
+from emg_gui.visualizer.source import Source
+from emg_gui.visualizer.spec import Spec
+from emg_gui.visualizer.time_series import Wave
+from emg_gui.core.enums import RecordingState, ActivityState
 
 
 def override(method) -> Any:

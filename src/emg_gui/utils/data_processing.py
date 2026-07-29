@@ -6,7 +6,7 @@ from brainflow.data_filter import (AggOperations, DataFilter, FilterTypes,
                                    NoiseTypes)
 from dotenv import load_dotenv
 
-from configs.constants import IS_SYNTHETIC_BOARD
+from emg_gui.configs.constants import IS_SYNTHETIC_BOARD
 
 BOARDID = BoardIds.SYNTHETIC_BOARD if IS_SYNTHETIC_BOARD else BoardIds.CYTON_BOARD
 

@@ -4,11 +4,11 @@ import moderngl
 import numpy as np
 from pyrr import Matrix44
 
-from configs.constants import GUI_WIDTH, SPECTROGRAM_WINDOW
+from emg_gui.configs.constants import GUI_WIDTH, SPECTROGRAM_WINDOW
 
-from ..shaders.shader_loader import spec_fragment_shader, spec_vertex_shader
-from ..utils.data_processing import get_hann_window
-from .source import Source
+from emg_gui.shaders.shader_loader import spec_fragment_shader, spec_vertex_shader
+from emg_gui.utils.data_processing import get_hann_window
+from emg_gui.visualizer.source import Source
 
 
 ## Captures 2(assuming 125 samples in one spectrogram-window) Hz to 125 Hz

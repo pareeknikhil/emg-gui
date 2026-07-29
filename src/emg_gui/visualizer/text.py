@@ -5,9 +5,9 @@ import freetype
 import numpy as np
 from pyrr import Matrix44
 
-from configs.constants import PREDICTION_FONT_SIZE
+from emg_gui.configs.constants import PREDICTION_FONT_SIZE
 
-from ..shaders.shader_loader import text_fragment_shader, text_vertex_shader
+from emg_gui.shaders.shader_loader import text_fragment_shader, text_vertex_shader
 
 font_path = os.environ.get('FONT_PATH')
 

@@ -1,11 +1,11 @@
 import moderngl
 import numpy as np
 
-from configs.constants import GUI_WIDTH, HOP_SIZE
+from emg_gui.configs.constants import GUI_WIDTH, HOP_SIZE
 
-from ..shaders.shader_loader import wave_fragment_shader, wave_vertex_shader
-from ..utils.data_processing import filter_data
-from .source import Source
+from emg_gui.shaders.shader_loader import wave_fragment_shader, wave_vertex_shader
+from emg_gui.utils.data_processing import filter_data
+from emg_gui.visualizer.source import Source
 
 
 class Wave:

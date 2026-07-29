@@ -2,12 +2,12 @@
 
 set -e
 
-export PYTHONPATH=$(pwd)
+export PYTHONPATH="$(pwd)/src"
 
 
 case $1 in 
     record)
-    python -B "$PYTHONPATH/scripts/app.py" 
+    python -B "$PYTHONPATH/emg_gui/app.py" 
     ;;
 
     *)

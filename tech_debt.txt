@@ -1,3 +1,0 @@
-1. Fix lints
-2. Add details (code set-up and dir structure) to readme along with python version
-3. GUI: when the type are swiched between test/train/validate, folders are shown (dynamically) in the dropdpwn option
