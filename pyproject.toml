@@ -6,7 +6,7 @@ authors = [
     {name = "pareeknikhil", email = "nikhilpareek149@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = "==3.9.10"
 dependencies = [
     "audioread (==3.1.0)",
     "brainflow (==5.16.0)",
@@ -61,5 +61,12 @@ dependencies = [
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry.scripts]
+[project.scripts]
 emg-gui = "emg_gui.app:main"
+
+[tool.poetry]
+packages = [{ include = "emg_gui", from = "src" }]
+include = [
+    { path = "src/emg_gui/shaders/**/*.glsl", format = ["sdist", "wheel"] },
+    { path = "src/emg_gui/configs/*.ttf", format = ["sdist", "wheel"] },
+]

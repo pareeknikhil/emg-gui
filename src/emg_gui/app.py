@@ -1,7 +1,3 @@
-from emg_gui.utils.data_processing import load_env_variables
-
-load_env_variables()
-
 from emg_gui.utils.log_utils import Logger
 from emg_gui.visualizer.window import EMGSignalAnalyzer
 

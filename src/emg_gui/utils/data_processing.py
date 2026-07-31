@@ -1,10 +1,7 @@
-import os
-
 import numpy as np
 from brainflow.board_shim import BoardIds, BoardShim
 from brainflow.data_filter import (AggOperations, DataFilter, FilterTypes,
                                    NoiseTypes)
-from dotenv import load_dotenv
 
 from emg_gui.configs.constants import IS_SYNTHETIC_BOARD
 
@@ -34,6 +31,3 @@ def get_hann_window(window_size, skew=True) -> np.ndarray:
         skewed_window = hann * np.exp(skew_factor - 2)
         hann /= np.max(skewed_window)
     return hann
-
-def load_env_variables() -> None: 
-    load_dotenv(override=True)
