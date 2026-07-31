@@ -1,8 +1,9 @@
 import os
 import glob
 import random
+from pathlib import Path
 
-csv_path = os.environ.get('CSV_PATH')
+csv_path = Path("data/csv")
 
 def get_all_labels(selected_type="train") -> list[str]: ## default from train
     train_path = os.path.join(csv_path, selected_type)

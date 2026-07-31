@@ -2,12 +2,13 @@ import sys
 import time
 
 import numpy as np
+import pandas as pd
 from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 
-from configs.constants import IS_SYNTHETIC_BOARD, SERIAL_PORT_LINUX, MARKER_START_ACTIVITY, MARKER_END_ACTIVITY
+from emg_gui.configs.constants import IS_SYNTHETIC_BOARD, SERIAL_PORT_LINUX
 
-from ..utils.tfrecord_utils import get_all_files
+from emg_gui.utils.tfrecord_utils import get_all_files
 
 
 class Source():
@@ -28,7 +29,7 @@ class Source():
         _params = BrainFlowInputParams()
         _params.serial_port = SERIAL_PORT_LINUX
 
-        self.emg_channels = Source.get_emg_channels()
+        self.emg_channels = [0, 1, 2, 3, 4, 5, 6, 7]
         self.board = BoardShim(board_id=Source.BOARDID, input_params=_params)
         self.board.prepare_session()
         if not self.board.is_prepared():
@@ -38,27 +39,28 @@ class Source():
         self.logger.info("SOURCE: Board initialized and SRB channels turned-off")
 
         self.is_recording = False
-        self.is_active = False
 
         self.emg_recording = []
 
+        self.file = 'data/csv/train/sample_type/file_1751067208.csv'
+
+        self.data = np.array(pd.read_csv(filepath_or_buffer=self.file, delimiter='\t')).T
+        self.current_idx = 0
+        self.max_idx = self.data.shape[1]
+
     @staticmethod
     def get_emg_channels():
-        channels = BoardShim.get_emg_channels(board_id=BoardIds.CYTON_BOARD)
-        marker_channel = BoardShim.get_marker_channel(board_id=Source.BOARDID)
-        return channels + [marker_channel] ## hard-coded: suppose to work for synthetic or cyton board (not any other config) 
+        return BoardShim.get_emg_channels(board_id=BoardIds.CYTON_BOARD) ## hard-coded: suppose to work for synthetic or cyton board (not any other config) 
 
     @staticmethod
     def get_num_emg_channels():
-        num_of_channels = len(BoardShim.get_emg_channels(board_id=BoardIds.CYTON_BOARD)) + len([BoardShim.get_marker_channel(board_id=BoardIds.CYTON_BOARD)])
-        return num_of_channels
+        return len(BoardShim.get_emg_channels(board_id=BoardIds.CYTON_BOARD))
 
     def turn_off_srb(self, board):
         for channel in self.emg_channels:
-            if channel != 23: ##--------Temp fix(excluded marker channel)-------------##
-                board_response = board.config_board(f'x{channel}060100X')[:1]
-                if board_response not in {'S', 'C'}:
-                    sys.exit(1)
+            board_response = board.config_board(f'x{channel}060100X')[:1]
+            if board_response not in {'S', 'C'}:
+                sys.exit(1)
 
     def start_stream(self) -> None:
         if self.board.is_prepared():
@@ -69,7 +71,12 @@ class Source():
             sys.exit(1)
 
     def get_data(self, num_of_samples_expctd) -> np.ndarray:
-        board_data = self.board.get_board_data(num_samples=num_of_samples_expctd)
+        # board_data = self.board.get_board_data(num_samples=num_of_samples_expctd)
+        if (self.current_idx + 10) > self.max_idx:
+            board_data = np.zeros([len(self.emg_channels), num_of_samples_expctd])
+        else:
+            board_data = self.data[:, self.current_idx:self.current_idx + 10]
+            self.current_idx = self.current_idx + 10
         emg_data = board_data[self.emg_channels, :]
         self.emg_recording.append(emg_data) if self.is_recording else None
         num_of_sampl_recvd = board_data.shape[-1]
@@ -90,16 +97,9 @@ class Source():
     def flip_recording_flag(self) -> None:
         self.is_recording = not self.is_recording
 
-    def flip_activity_flag(self) -> None:
-        if not self.is_active:
-            self.board.insert_marker(MARKER_START_ACTIVITY)
-        else:
-            self.board.insert_marker(MARKER_END_ACTIVITY)
-        self.is_active = not self.is_active
-
     def write_to_disk(self, type, label) -> None:
         emg_numpy = np.concatenate(self.emg_recording, axis=1)
-        file_path = f'data/csv/{type}/{label}/{str(int(time.time()))}__{label}.csv'
+        file_path = f'data/csv/{type}/{label}/file_{str(int(time.time()))}.csv' ## hard-coded: [TECH DEBT]
         DataFilter.write_file(data=emg_numpy, file_name=file_path, file_mode='w')
         file_ds = get_all_files(pattern=f'data/csv/{type}/{label}/*.csv', shuffle_flag=False) ## hard-coded: [TECH DEBT]
         print(f"SOURCE: File written in folder: {type}/{label} (Total files: {sum(1 for _ in file_ds)})")

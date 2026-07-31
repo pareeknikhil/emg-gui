@@ -2,7 +2,7 @@
 
 Copyright (c) 2026 Nikhil Pareek
 
-Contact: pareeknikhil92@gmail.com  
+Contact: nikhilpareek149@gmail.com  
 GitHub: https://github.com/pareeknikhil
 
 All rights reserved.

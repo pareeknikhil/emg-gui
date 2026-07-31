@@ -7,13 +7,14 @@ from PyQt5.QtWidgets import (QAction, QApplication, QLabel, QMenu,
                              QOpenGLWidget, QPushButton, QShortcut,
                              QToolButton)
 
-from configs.constants import (FRAME_RATE, GUI_HEIGHT, GUI_WIDTH, HOP_SIZE,
+from emg_gui.configs.constants import (FRAME_RATE, GUI_HEIGHT, GUI_WIDTH, HOP_SIZE,
                                SPECTROGRAM_WINDOW)
 
-from ..utils.tfrecord_utils import get_all_labels
-from .source import Source
-from .spec import Spec
-from .time_series import Wave
+from emg_gui.utils.tfrecord_utils import get_all_labels
+from emg_gui.visualizer.source import Source
+from emg_gui.visualizer.spec import Spec
+from emg_gui.visualizer.time_series import Wave
+from emg_gui.core.enums import RecordingState, ActivityState
 
 
 def override(method) -> Any:
@@ -88,9 +89,6 @@ class EMGSignalAnalyzer(QOpenGLWidget):
             callback=self.on_activity_selected
         )
 
-        self.start_recording = True
-        self.start_activity = True
-
     def create_dropdown_button(self, label, items, color, position, callback) -> QToolButton:
         button = QToolButton(self)
         button.setText(label)
@@ -116,39 +114,35 @@ class EMGSignalAnalyzer(QOpenGLWidget):
         self.selected_type = type_name
 
     def on_click(self) -> None:
-        self.cyton.flip_recording_flag()
         self.remaining_time = 0
 
-        if self.start_recording:
+        if self.cyton.recording_state is RecordingState.IDLE:
+            self.cyton.start_recording()
             self.timer.start()
+
             self.start_button.setText("Stop Recording")
             self.start_button.setStyleSheet(self.get_stylesheet(color="red"))
+            return
+        
+        self.cyton.stop_recording()
+        self.timer.stop()
 
-        else:
-            self.timer.stop()
-            self.label.setText(f"{self.remaining_time}")
-            self.start_button.setText("Start Recording")
-            self.start_button.setStyleSheet(self.get_stylesheet(color="green"))
-            self.cyton.write_to_disk(self.selected_type, self.location, )
-
-        self.start_recording = not self.start_recording
+        self.label.setText(f"{self.remaining_time}")
+        self.start_button.setText("Start Recording")
+        self.start_button.setStyleSheet(self.get_stylesheet(color="green"))
+        self.cyton.write_to_disk(self.selected_type, self.location, )
 
     def on_activity(self) -> None:
-        self.cyton.flip_activity_flag()
 
-        if self.start_activity:
-            # self.timer.start()
+        if self.cyton.activity_state is ActivityState.INACTIVE:
+            self.cyton.insert_start_marker()
             self.activity_button.setText("Stop Activity")
             self.activity_button.setStyleSheet(self.get_stylesheet(color="red"))
+            return
 
-        else:
-            # self.timer.stop()
-            # self.label.setText(f"{self.remaining_time}")
-            self.activity_button.setText("Start Activity")
-            self.activity_button.setStyleSheet(self.get_stylesheet(color="green"))
-            # self.cyton.write_to_disk(self.selected_type, self.location, )
-
-        self.start_activity = not self.start_activity
+        self.cyton.insert_stop_marker()
+        self.activity_button.setText("Start Activity")
+        self.activity_button.setStyleSheet(self.get_stylesheet(color="green"))
 
     def update_countdown(self) -> None:
         self.remaining_time += 1
