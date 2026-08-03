@@ -2,30 +2,16 @@ import moderngl
 import numpy as np
 
 from emg_gui.configs.constants import GUI_WIDTH, HOP_SIZE
-
-from emg_gui.shaders.shader_loader import wave_fragment_shader, wave_vertex_shader
+from emg_gui.shaders.shader_loader import (wave_fragment_shader,
+                                           wave_vertex_shader)
 from emg_gui.utils.data_processing import filter_data
-from emg_gui.visualizer.source import Source
 
 
-class Wave:
-    __instance = None
-
-    @classmethod
-    def get_instance(cls, ctx, logger) -> "Wave":
-        if cls.__instance is None:
-            cls.__instance = cls(ctx, logger)
-        return cls.__instance
-
-    def reset(self) -> None:
-        self.time_series.fill(0)
-        self.uv_plot.fill(0)
-
-
-    def __init__(self, ctx, logger) -> None:
+class TimeSeries:
+    def __init__(self, ctx, logger, emg_channel_count: int) -> None:
         self.logger = logger
 
-        self.num_emg_channels = Source.get_num_emg_channels()
+        self.num_emg_channels = emg_channel_count
 
         self.time_series = np.zeros(shape=(self.num_emg_channels, GUI_WIDTH+500))
         self.uv_plot = np.zeros(shape=(self.num_emg_channels, GUI_WIDTH))
@@ -36,8 +22,12 @@ class Wave:
         self.vao = ctx.vertex_array(self.prog, self.buffer, "in_position")
         self.draw()
 
+    def reset(self) -> None:
+        self.time_series.fill(0)
+        self.uv_plot.fill(0)
+
     def add(self, new_wave_data) -> None:
-        self.logger.info(f"WAVE: Recvd data for buffer (no. of channels: {new_wave_data.shape[0]}), " 
+        self.logger.info(f"TIMESERIES: Recvd data for buffer (no. of channels: {new_wave_data.shape[0]}), " 
                     f"no. of data points in each channel: {new_wave_data.shape[1]}")
         self.__add_new_wave(new_wave_data=new_wave_data)
 
@@ -56,7 +46,7 @@ class Wave:
             self.prog['u_channel_index'].value = float(i)
             self.vao.render(moderngl.LINE_STRIP, vertices=width, first=i*width)
 
-        self.logger.info("WAVE: Drawing")
+        self.logger.info("TIMESERIES: Drawing")
 
     def get_filtrd_emg(self, n_latest_samples) -> np.ndarray:
         return self.uv_plot[:, -n_latest_samples:]
@@ -71,4 +61,4 @@ class Wave:
         self.time_series[:, -HOP_SIZE:] = new_wave_data
         for count in range(self.num_emg_channels):
             self.uv_plot[count, :] = filter_data(self.time_series[count, :])
-        self.logger.info("WAVE: Updated filtered data to buffer")
+        self.logger.info("TIMESERIES: Updated filtered data to buffer")

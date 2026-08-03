@@ -5,31 +5,21 @@ import numpy as np
 from pyrr import Matrix44
 
 from emg_gui.configs.constants import GUI_WIDTH, SPECTROGRAM_WINDOW
-
-from emg_gui.shaders.shader_loader import spec_fragment_shader, spec_vertex_shader
+from emg_gui.shaders.shader_loader import (spec_fragment_shader,
+                                           spec_vertex_shader)
 from emg_gui.utils.data_processing import get_hann_window
-from emg_gui.visualizer.source import Source
 
 
-## Captures 2(assuming 125 samples in one spectrogram-window) Hz to 125 Hz
-class Spec:
+## Captures 2(assuming 125 samples in one spectrogram-window) Hz to 125 Hz [TECH DEBT: hardcoded]
+class Spectrogram:
     COLOR_MAP = cm.get_cmap(name='inferno')
     HANN_WINDOW = get_hann_window(window_size=SPECTROGRAM_WINDOW, skew=True)
     HANN_WINDOW.setflags(write=False)
 
-    __instance = None
-
-    @classmethod
-    def get_instance(cls, ctx, y, h, logger) -> "Spec":
-        if cls.__instance is None:
-            cls.__instance = cls(ctx, y, h, logger)
-        return cls.__instance
-
-
-    def __init__(self, ctx, y, h, logger) -> None:
+    def __init__(self, ctx, y, h, logger, emg_channel_count: int) -> None:
         self.logger = logger
 
-        self.num_emg_channels = Source.get_num_emg_channels()
+        self.num_emg_channels = emg_channel_count
 
         self.frames = np.zeros((self.num_emg_channels, SPECTROGRAM_WINDOW//2 + 1, GUI_WIDTH, 3), dtype='u1')
 
@@ -65,14 +55,14 @@ class Spec:
         self.frames = np.zeros((self.num_emg_channels, SPECTROGRAM_WINDOW//2 + 1, GUI_WIDTH, 3), dtype='u1')
 
     def add(self, window) -> None:
-        slices = Spec.stft_slice(window)
-        new_slice = Spec.stft_color(slices)
+        slices = Spectrogram.stft_slice(window)
+        new_slice = Spectrogram.stft_color(slices)
         self.frames[:, :, :-1, :] = self.frames[:, :, 1:, :]
         self.frames[:, :, -1, :] = new_slice
         self.logger.info(f"SPEC: Adding window shape {window.shape}")
 
     def size(self, w, h) -> None:
-        P = Spec.orthographic(w, h)
+        P = Spectrogram.orthographic(w, h)
         self.prog['P'].write(P)
 
     def draw(self) -> None:
@@ -90,14 +80,14 @@ class Spec:
 
     @staticmethod
     def stft_slice(window) -> np.ndarray:
-        return np.fft.rfft(window*Spec.HANN_WINDOW, axis=1)
+        return np.fft.rfft(window*Spectrogram.HANN_WINDOW, axis=1)
 
     @staticmethod
     def stft_color(slices, min_db=-5, max_db=10):
         slices = librosa.amplitude_to_db(slices)
         slices = slices.clip(min_db, max_db)
         slices = (slices-min_db) / (max_db-min_db)
-        slices = Spec.COLOR_MAP(slices)
+        slices = Spectrogram.COLOR_MAP(slices)
         slices = (slices * 255).astype("u1")
         return slices[:, :, :3]
 

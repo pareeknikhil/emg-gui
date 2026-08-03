@@ -1,5 +1,6 @@
 from importlib import resources
 
+
 def load_shadr_file(*paths: str) -> str:
     return (
         resources.files("emg_gui.shaders")
