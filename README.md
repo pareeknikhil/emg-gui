@@ -46,7 +46,27 @@ TODO
 
 ---
 
-## 5. Tech Debt
+## 5. Run Super-Linter Locally
+
+### 5.1 Run All Linters
+
+From the project root, run all supported linters using Docker:
+
+```bash
+sudo docker run --rm -e RUN_LOCAL=true -e DEFAULT_BRANCH=main -e VALIDATE_ALL_CODEBASE=true -v "$PWD":/tmp/lint ghcr.io/super-linter/super-linter:v8.7.0
+```
+
+### 5.2 Run a Specific Linter
+
+Set the relevant `VALIDATE_<LINTER_NAME>` environment variable to `true`. For example, to run only Ruff:
+
+```bash
+sudo docker run --rm -e RUN_LOCAL=true -e DEFAULT_BRANCH=main -e VALIDATE_ALL_CODEBASE=true -e VALIDATE_PYTHON_RUFF=true -v "$PWD":/tmp/lint ghcr.io/super-linter/super-linter:v8.7.0
+```
+
+---
+
+## 6. Tech Debt
 
 1. Fix lints.
 2. Add code setup details to this README.

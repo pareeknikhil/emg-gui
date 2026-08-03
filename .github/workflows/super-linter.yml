@@ -4,7 +4,7 @@ on:
   # Run on pushes to feature branch
   push:
     branches:
-    - "feature/**"
+      - "feature/**"
 
   # Run when a PR targets main/master
   pull_request:
