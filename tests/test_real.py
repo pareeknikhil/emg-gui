@@ -9,7 +9,16 @@ from brainflow.data_filter import AggOperations, DataFilter, FilterTypes, NoiseT
 
 df = pd.read_csv(
     filepath_or_buffer="data/csv/train/stretch/file_1752595795.csv",
-    names=["channel_1", "channel_2", "channel_3", "channel_4", "channel_5", "channel_6", "channel_7", "channel_8"],
+    names=[
+        "channel_1",
+        "channel_2",
+        "channel_3",
+        "channel_4",
+        "channel_5",
+        "channel_6",
+        "channel_7",
+        "channel_8",
+    ],
     delimiter="\t",
 )
 
@@ -21,7 +30,7 @@ window_size, spec_window, stride = (
     125,
     100,
     1,
-)  ## refine this logic, take 1700 or less to filter, then further subdived for 100 spec windows
+)  # refine this logic, take 1700 or less to filter, then further subdived for 100 spec windows
 
 
 def stride_window(a, window_size, stride):
@@ -54,8 +63,12 @@ def filter_fn(data):
         filter_type=FilterTypes.BUTTERWORTH,
         ripple=1.0,
     )
-    DataFilter.remove_environmental_noise(data=data, sampling_rate=250, noise_type=NoiseTypes.FIFTY.value)
-    DataFilter.remove_environmental_noise(data=data, sampling_rate=250, noise_type=NoiseTypes.SIXTY.value)
+    DataFilter.remove_environmental_noise(
+        data=data, sampling_rate=250, noise_type=NoiseTypes.FIFTY.value
+    )
+    DataFilter.remove_environmental_noise(
+        data=data, sampling_rate=250, noise_type=NoiseTypes.SIXTY.value
+    )
     return data
 
 
@@ -76,7 +89,9 @@ for i in range(8):
     mag_with_hann = tf.abs(stft_with_hann)
     power_with_hann = tf.math.square(mag_with_hann)
     power_with_hann = tf.cast(power_with_hann, tf.float32)
-    log_with_hann = 10.0 * tf.math.log(tf.maximum(power_with_hann, 1e-10)) / tf.math.log(10.0)
+    log_with_hann = (
+        10.0 * tf.math.log(tf.maximum(power_with_hann, 1e-10)) / tf.math.log(10.0)
+    )
     log_with_hann = tf.maximum(log_with_hann, tf.reduce_max(log_with_hann) - 80.0)
 
     min_db = -5

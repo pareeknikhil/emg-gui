@@ -7,7 +7,12 @@ from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 from typing_extensions import override
 
-from emg_gui.configs.constants import IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY, MARKER_START_ACTIVITY, SERIAL_PORT_LINUX
+from emg_gui.configs.constants import (
+    IS_SYNTHETIC_BOARD,
+    MARKER_END_ACTIVITY,
+    MARKER_START_ACTIVITY,
+    SERIAL_PORT_LINUX,
+)
 from emg_gui.core.enums import ActivityState, RecordingState
 from emg_gui.core.types import EMGArray
 from emg_gui.utils.tfrecord_utils import get_all_files
@@ -56,17 +61,21 @@ class RealOpenBCI:
 
     @classmethod
     def get_list_emg_channels(cls) -> list[int]:
-        channels = BoardShim.get_emg_channels(board_id=BoardIds.CYTON_BOARD)  ## [TECH DEBT: hardcoded to cyton]
-        marker_channel = BoardShim.get_marker_channel(board_id=BoardIds.CYTON_BOARD)  ## [TECH DEBT: hardcoded to cyton]
+        channels = BoardShim.get_emg_channels(
+            board_id=BoardIds.CYTON_BOARD
+        )  # [TECH DEBT: hardcoded to cyton]
+        marker_channel = BoardShim.get_marker_channel(
+            board_id=BoardIds.CYTON_BOARD
+        )  # [TECH DEBT: hardcoded to cyton]
         return channels + [
             marker_channel
-        ]  ## hard-coded: suppose to work for synthetic or cyton board (not any other config)
+        ]  # hard-coded: suppose to work for synthetic or cyton board (not any other config)
 
     @classmethod
     def get_count_emg_channels(cls) -> int:
-        num_of_channels = len(BoardShim.get_emg_channels(board_id=BoardIds.CYTON_BOARD)) + len(
-            [BoardShim.get_marker_channel(board_id=BoardIds.CYTON_BOARD)]
-        )
+        num_of_channels = len(
+            BoardShim.get_emg_channels(board_id=BoardIds.CYTON_BOARD)
+        ) + len([BoardShim.get_marker_channel(board_id=BoardIds.CYTON_BOARD)])
         return num_of_channels
 
     def __init__(self, logger) -> None:
@@ -93,7 +102,9 @@ class RealOpenBCI:
     def start_stream(self) -> None:
         if self._board.is_prepared():
             self._board.start_stream()
-            self.logger.info(f"DATASOURCE: Data Stream Started (synthetic data: {IS_SYNTHETIC_BOARD})")
+            self.logger.info(
+                f"DATASOURCE: Data Stream Started (synthetic data: {IS_SYNTHETIC_BOARD})"
+            )
         else:
             self.logger.error("DATASOURCE: Unable to connect with OpenBCI board")
             sys.exit(1)
@@ -139,8 +150,10 @@ class RealOpenBCI:
         DataFilter.write_file(data=emg_numpy, file_name=file_path, file_mode="w")
         file_ds = get_all_files(
             pattern=f"data/csv/{type}/{label}/*.csv", shuffle_flag=False
-        )  ## hard-coded: [TECH DEBT]
-        print(f"DATASOURCE: File written in folder: {type}/{label} (Total files: {sum(1 for _ in file_ds)})")
+        )  # hard-coded: [TECH DEBT]
+        print(
+            f"DATASOURCE: File written in folder: {type}/{label} (Total files: {sum(1 for _ in file_ds)})"
+        )
         self._emg_recording.clear()
         print("DATASOURCE: Source data storage cleaned(Reset)")
 
@@ -154,7 +167,7 @@ class RealOpenBCI:
 
     def _turn_off_srb(self, board):
         for channel in self._emg_channels:
-            if channel != 23:  ##--------Temp fix(excluded marker channel)-------------##
+            if channel != 23:  # --------Temp fix(excluded marker channel)-------------
                 board_response = board.config_board(f"x{channel}060100X")[:1]
                 if board_response not in {"S", "C"}:
                     sys.exit(1)
@@ -184,7 +197,9 @@ class RealOpenBCI:
         )
         padded_data[:, :received_samples] = emg_data
 
-        self.logger.info(f"DATASOURCE: Padded data on per channel (new no. of samples {padded_data.shape[1]})")
+        self.logger.info(
+            f"DATASOURCE: Padded data on per channel (new no. of samples {padded_data.shape[1]})"
+        )
 
         return padded_data
 

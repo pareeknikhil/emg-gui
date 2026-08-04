@@ -8,7 +8,16 @@ from brainflow.data_filter import AggOperations, DataFilter, FilterTypes, NoiseT
 
 df = pd.read_csv(
     filepath_or_buffer="data/csv/train/bottom_fist/file_1751064209.csv",
-    names=["channel_1", "channel_2", "channel_3", "channel_4", "channel_5", "channel_6", "channel_7", "channel_8"],
+    names=[
+        "channel_1",
+        "channel_2",
+        "channel_3",
+        "channel_4",
+        "channel_5",
+        "channel_6",
+        "channel_7",
+        "channel_8",
+    ],
     delimiter="\t",
 )
 # df.channel_1.plot(kind='line')
@@ -43,8 +52,12 @@ DataFilter.perform_bandpass(
     filter_type=FilterTypes.BUTTERWORTH,
     ripple=1.0,
 )
-DataFilter.remove_environmental_noise(data=filter_no_scale, sampling_rate=250, noise_type=NoiseTypes.FIFTY.value)
-DataFilter.remove_environmental_noise(data=filter_no_scale, sampling_rate=250, noise_type=NoiseTypes.SIXTY.value)
+DataFilter.remove_environmental_noise(
+    data=filter_no_scale, sampling_rate=250, noise_type=NoiseTypes.FIFTY.value
+)
+DataFilter.remove_environmental_noise(
+    data=filter_no_scale, sampling_rate=250, noise_type=NoiseTypes.SIXTY.value
+)
 # axes[1].plot(filter_no_scale)
 
 
@@ -71,8 +84,12 @@ DataFilter.perform_bandpass(
     filter_type=FilterTypes.BUTTERWORTH,
     ripple=1.0,
 )
-DataFilter.remove_environmental_noise(data=filter_with_scale, sampling_rate=250, noise_type=NoiseTypes.FIFTY.value)
-DataFilter.remove_environmental_noise(data=filter_with_scale, sampling_rate=250, noise_type=NoiseTypes.SIXTY.value)
+DataFilter.remove_environmental_noise(
+    data=filter_with_scale, sampling_rate=250, noise_type=NoiseTypes.FIFTY.value
+)
+DataFilter.remove_environmental_noise(
+    data=filter_with_scale, sampling_rate=250, noise_type=NoiseTypes.SIXTY.value
+)
 # axes[2].plot(filter_with_scale)
 
 # plt.tight_layout()

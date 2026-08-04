@@ -1,10 +1,25 @@
 import moderngl
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QSurfaceFormat
-from PyQt5.QtWidgets import QAction, QApplication, QLabel, QMenu, QOpenGLWidget, QPushButton, QShortcut, QToolButton
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QLabel,
+    QMenu,
+    QOpenGLWidget,
+    QPushButton,
+    QShortcut,
+    QToolButton,
+)
 from typing_extensions import override
 
-from emg_gui.configs.constants import FRAME_RATE, GUI_HEIGHT, GUI_WIDTH, HOP_SIZE, SPECTROGRAM_WINDOW
+from emg_gui.configs.constants import (
+    FRAME_RATE,
+    GUI_HEIGHT,
+    GUI_WIDTH,
+    HOP_SIZE,
+    SPECTROGRAM_WINDOW,
+)
 from emg_gui.core.enums import ActivityState, RecordingState
 from emg_gui.utils.tfrecord_utils import get_all_labels
 from emg_gui.visualizer.data_source import DataSource
@@ -81,7 +96,9 @@ class EMGSignalAnalyzer(QOpenGLWidget):
             callback=self.on_activity_selected,
         )
 
-    def create_dropdown_button(self, label, items, color, position, callback) -> QToolButton:
+    def create_dropdown_button(
+        self, label, items, color, position, callback
+    ) -> QToolButton:
         button = QToolButton(self)
         button.setText(label)
         button.setPopupMode(QToolButton.MenuButtonPopup)
@@ -180,7 +197,9 @@ class EMGSignalAnalyzer(QOpenGLWidget):
         self.time_series.add(new_wave_data=emg_data)
         self.time_series.draw()
 
-        filtrd_emg = self.time_series.get_filtrd_emg(n_latest_samples=SPECTROGRAM_WINDOW)
+        filtrd_emg = self.time_series.get_filtrd_emg(
+            n_latest_samples=SPECTROGRAM_WINDOW
+        )
 
         self.spec_series.add(filtrd_emg)
         self.spec_series.draw()

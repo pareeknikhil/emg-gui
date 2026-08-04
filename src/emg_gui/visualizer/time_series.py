@@ -16,7 +16,9 @@ class TimeSeries:
         self.uv_plot = np.zeros(shape=(self.num_emg_channels, GUI_WIDTH))
         self.x_points = np.linspace(start=-1, stop=1, num=GUI_WIDTH)
 
-        self.prog = ctx.program(vertex_shader=wave_vertex_shader, fragment_shader=wave_fragment_shader)
+        self.prog = ctx.program(
+            vertex_shader=wave_vertex_shader, fragment_shader=wave_fragment_shader
+        )
         self.buffer = ctx.buffer(reserve=self.uv_plot.nbytes * 3, dynamic=True)
         self.vao = ctx.vertex_array(self.prog, self.buffer, "in_position")
         self.draw()

@@ -2,7 +2,9 @@ from importlib import resources
 
 
 def load_shadr_file(*paths: str) -> str:
-    return resources.files("emg_gui.shaders").joinpath(*paths).read_text(encoding="utf-8")
+    return (
+        resources.files("emg_gui.shaders").joinpath(*paths).read_text(encoding="utf-8")
+    )
 
 
 wave_vertex_shader = load_shadr_file("wave", "vertex.glsl")

@@ -9,7 +9,7 @@ from emg_gui.shaders.shader_loader import spec_fragment_shader, spec_vertex_shad
 from emg_gui.utils.data_processing import get_hann_window
 
 
-## Captures 2(assuming 125 samples in one spectrogram-window) Hz to 125 Hz [TECH DEBT: hardcoded]
+# Captures 2(assuming 125 samples in one spectrogram-window) Hz to 125 Hz [TECH DEBT: hardcoded]
 class Spectrogram:
     COLOR_MAP = cm.get_cmap(name="inferno")
     HANN_WINDOW = get_hann_window(window_size=SPECTROGRAM_WINDOW, skew=True)
@@ -20,9 +20,14 @@ class Spectrogram:
 
         self.num_emg_channels = emg_channel_count
 
-        self.frames = np.zeros((self.num_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, GUI_WIDTH, 3), dtype="u1")
+        self.frames = np.zeros(
+            (self.num_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, GUI_WIDTH, 3),
+            dtype="u1",
+        )
 
-        self.prog = ctx.program(vertex_shader=spec_vertex_shader, fragment_shader=spec_fragment_shader)
+        self.prog = ctx.program(
+            vertex_shader=spec_vertex_shader, fragment_shader=spec_fragment_shader
+        )
 
         vertices = []
         for i in range(self.num_emg_channels):
@@ -65,16 +70,23 @@ class Spectrogram:
 
         vertices = np.array(vertices, dtype="f4")
         self.buffer = ctx.buffer(vertices)
-        self.vao = ctx.vertex_array(self.prog, [(self.buffer, "2f 2f 1f", "in_position", "in_uv", "in_layer")])
+        self.vao = ctx.vertex_array(
+            self.prog, [(self.buffer, "2f 2f 1f", "in_position", "in_uv", "in_layer")]
+        )
 
         self.textures = ctx.texture_array(
-            size=(GUI_WIDTH, SPECTROGRAM_WINDOW // 2 + 1, self.num_emg_channels), components=3, data=self.frames
+            size=(GUI_WIDTH, SPECTROGRAM_WINDOW // 2 + 1, self.num_emg_channels),
+            components=3,
+            data=self.frames,
         )
         self.textures.repeat_x = False
         self.textures.repeat_y = True
 
     def reset(self) -> None:
-        self.frames = np.zeros((self.num_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, GUI_WIDTH, 3), dtype="u1")
+        self.frames = np.zeros(
+            (self.num_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, GUI_WIDTH, 3),
+            dtype="u1",
+        )
 
     def add(self, window) -> None:
         slices = Spectrogram.stft_slice(window)

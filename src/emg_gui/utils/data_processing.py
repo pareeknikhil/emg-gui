@@ -33,11 +33,15 @@ def filter_data(data: np.ndarray) -> np.ndarray:
     )
 
     DataFilter.remove_environmental_noise(
-        data=data, sampling_rate=BoardShim.get_sampling_rate(BOARDID), noise_type=NoiseTypes.FIFTY.value
+        data=data,
+        sampling_rate=BoardShim.get_sampling_rate(BOARDID),
+        noise_type=NoiseTypes.FIFTY.value,
     )
 
     DataFilter.remove_environmental_noise(
-        data=data, sampling_rate=BoardShim.get_sampling_rate(BOARDID), noise_type=NoiseTypes.SIXTY.value
+        data=data,
+        sampling_rate=BoardShim.get_sampling_rate(BOARDID),
+        noise_type=NoiseTypes.SIXTY.value,
     )
 
     return data[500:]
