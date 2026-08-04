@@ -7,9 +7,7 @@ from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 from typing_extensions import override
 
-from emg_gui.configs.constants import (IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY,
-                                       MARKER_START_ACTIVITY,
-                                       SERIAL_PORT_LINUX)
+from emg_gui.configs.constants import IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY, MARKER_START_ACTIVITY, SERIAL_PORT_LINUX
 from emg_gui.core.enums import ActivityState, RecordingState
 from emg_gui.core.types import EMGArray
 from emg_gui.utils.tfrecord_utils import get_all_files
@@ -173,7 +171,9 @@ class RealOpenBCI:
             self._emg_recording.append(emg_data)
 
         received_samples = emg_data.shape[-1]
-        self.logger.info(f"DATASOURCE: Received data per channel from board: {received_samples}, requested: {expected_samples}")
+        self.logger.info(
+            f"DATASOURCE: Received data per channel from board: {received_samples}, requested: {expected_samples}"
+        )
 
         if received_samples == expected_samples:
             return emg_data
@@ -187,6 +187,7 @@ class RealOpenBCI:
         self.logger.info(f"DATASOURCE: Padded data on per channel (new no. of samples {padded_data.shape[1]})")
 
         return padded_data
+
 
 class VisualizeFile(RealOpenBCI):
     @override
@@ -208,4 +209,4 @@ class VisualizeFile(RealOpenBCI):
             board_data = self.data[:, self.current_idx : self.current_idx + 10]
             self.current_idx = self.current_idx + 10
 
-        return self._process_data(board_data, self.emg_channels, num_of_samples_expctd) 
+        return self._process_data(board_data, self.emg_channels, num_of_samples_expctd)

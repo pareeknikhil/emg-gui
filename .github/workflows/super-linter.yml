@@ -37,6 +37,3 @@ jobs:
 
           # Lint the entire repository on every run
           VALIDATE_ALL_CODEBASE: true
-
-          # Do not lint files ignored by .gitignore
-          IGNORE_GITIGNORED_FILES: true
