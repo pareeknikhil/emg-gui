@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from brainflow.data_filter import (AggOperations, DataFilter, FilterTypes,
-                                   NoiseTypes)
+from brainflow.data_filter import AggOperations, DataFilter, FilterTypes, NoiseTypes
 from matplotlib import cm
 
 df = pd.read_csv(
