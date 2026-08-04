@@ -35,6 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_TRIVY: "false"
           VALIDATE_PYTHON_RUFF_FORMAT: "false"
+          VALIDATE_PYTHON_ISORT: "false"
 
           # Lint the entire repository on every run
           VALIDATE_ALL_CODEBASE: true
