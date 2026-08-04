@@ -69,5 +69,5 @@ sudo docker run --rm -e RUN_LOCAL=true -e DEFAULT_BRANCH=main -e VALIDATE_ALL_CO
 ## 6. Tech Debt
 
 1. Fix lints.
-2. Add code setup details to this README.
+2. Add code setup details to this readme.
 3. Update the GUI so switching between test, train, and validate dynamically updates the folder dropdown options.

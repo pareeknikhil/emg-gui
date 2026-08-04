@@ -7,7 +7,9 @@ from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 from typing_extensions import override
 
-from emg_gui.configs.constants import IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY, MARKER_START_ACTIVITY, SERIAL_PORT_LINUX
+from emg_gui.configs.constants import (IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY,
+                                       MARKER_START_ACTIVITY,
+                                       SERIAL_PORT_LINUX)
 from emg_gui.core.enums import ActivityState, RecordingState
 from emg_gui.core.types import EMGArray
 from emg_gui.utils.tfrecord_utils import get_all_files
@@ -131,20 +133,7 @@ class RealOpenBCI:
 
     def get_data(self, num_of_samples_expctd: int) -> EMGArray:
         board_data = self._board.get_board_data(num_samples=num_of_samples_expctd)
-        emg_data = board_data[self._emg_channels, :]
-        if self.recording_state is RecordingState.RECORDING:
-            self._emg_recording.append(emg_data)
-        num_of_sampl_recvd = board_data.shape[-1]
-        self.logger.info(
-            f"DATASOURCE: Received data per channel from board: {num_of_sampl_recvd}, requested: {num_of_samples_expctd}"
-        )
-        if num_of_sampl_recvd == num_of_samples_expctd:
-            return emg_data
-
-        padded_emg_data = np.zeros([len(self._emg_channels), num_of_samples_expctd])
-        padded_emg_data[:, : emg_data.shape[1]] = emg_data
-        self.logger.info(f"DATASOURCE: Padded data on per channel (new no. of samples {padded_emg_data.shape[1]})")
-        return padded_emg_data
+        return self._process_data(board_data, self._emg_channels, num_of_samples_expctd)
 
     def write_to_disk(self, type: str, label: str) -> None:
         emg_numpy = np.concatenate(self._emg_recording, axis=1)
@@ -172,6 +161,32 @@ class RealOpenBCI:
                 if board_response not in {"S", "C"}:
                     sys.exit(1)
 
+    def _process_data(
+        self,
+        board_data: EMGArray,
+        channels: list[int],
+        expected_samples: int,
+    ) -> EMGArray:
+        emg_data = board_data[channels, :]
+
+        if self.recording_state is RecordingState.RECORDING:
+            self._emg_recording.append(emg_data)
+
+        received_samples = emg_data.shape[-1]
+        self.logger.info(f"DATASOURCE: Received data per channel from board: {received_samples}, requested: {expected_samples}")
+
+        if received_samples == expected_samples:
+            return emg_data
+
+        padded_data = np.zeros(
+            (len(channels), expected_samples),
+            dtype=emg_data.dtype,
+        )
+        padded_data[:, :received_samples] = emg_data
+
+        self.logger.info(f"DATASOURCE: Padded data on per channel (new no. of samples {padded_data.shape[1]})")
+
+        return padded_data
 
 class VisualizeFile(RealOpenBCI):
     @override
@@ -192,17 +207,5 @@ class VisualizeFile(RealOpenBCI):
         else:
             board_data = self.data[:, self.current_idx : self.current_idx + 10]
             self.current_idx = self.current_idx + 10
-        emg_data = board_data[self.emg_channels, :]
-        if self.recording_state is RecordingState.RECORDING:
-            self._emg_recording.append(emg_data)
-        num_of_sampl_recvd = board_data.shape[-1]
-        self.logger.info(
-            f"DATASOURCE: Received data per channel from board: {num_of_sampl_recvd}, requested: {num_of_samples_expctd}"
-        )
-        if num_of_sampl_recvd == num_of_samples_expctd:
-            return emg_data
 
-        padded_emg_data = np.zeros([len(self.emg_channels), num_of_samples_expctd])
-        padded_emg_data[:, : emg_data.shape[1]] = emg_data
-        self.logger.info(f"DATASOURCE: Padded data on per channel (new no. of samples {padded_emg_data.shape[1]})")
-        return padded_emg_data
+        return self._process_data(board_data, self.emg_channels, num_of_samples_expctd) 
