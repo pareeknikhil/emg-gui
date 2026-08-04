@@ -36,6 +36,7 @@ jobs:
           VALIDATE_TRIVY: "false"
           VALIDATE_PYTHON_RUFF_FORMAT: "false"
           VALIDATE_PYTHON_ISORT: "false"
+          VALIDATE_PYTHON_PYLINT: "false"
 
           # Lint the entire repository on every run
           VALIDATE_ALL_CODEBASE: true

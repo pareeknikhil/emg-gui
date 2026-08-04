@@ -1,0 +1,23 @@
+[MAIN]
+py-version=3.9
+
+[MESSAGES CONTROL]
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    duplicate-code,
+    import-error
+
+[FORMAT]
+max-line-length=120
+
+[BASIC]
+good-names=
+    closeEvent,
+    initializeGL,
+    resizeGL,
+    paintGL
+
+[DESIGN]
+max-attributes=16

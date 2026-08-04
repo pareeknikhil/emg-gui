@@ -1,11 +1,12 @@
 import copy
 
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from brainflow.data_filter import AggOperations, DataFilter, FilterTypes, NoiseTypes
+from brainflow.data_filter import (AggOperations, DataFilter, FilterTypes,
+                                   NoiseTypes)
+from matplotlib import cm
 
 df = pd.read_csv(
     filepath_or_buffer="data/csv/train/stretch/file_1752595795.csv",
