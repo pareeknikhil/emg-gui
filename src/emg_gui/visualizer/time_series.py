@@ -2,8 +2,7 @@ import moderngl
 import numpy as np
 
 from emg_gui.configs.constants import GUI_WIDTH, HOP_SIZE
-from emg_gui.shaders.shader_loader import (wave_fragment_shader,
-                                           wave_vertex_shader)
+from emg_gui.shaders.shader_loader import wave_fragment_shader, wave_vertex_shader
 from emg_gui.utils.data_processing import filter_data
 
 
@@ -13,11 +12,13 @@ class TimeSeries:
 
         self.num_emg_channels = emg_channel_count
 
-        self.time_series = np.zeros(shape=(self.num_emg_channels, GUI_WIDTH+500))
+        self.time_series = np.zeros(shape=(self.num_emg_channels, GUI_WIDTH + 500))
         self.uv_plot = np.zeros(shape=(self.num_emg_channels, GUI_WIDTH))
         self.x_points = np.linspace(start=-1, stop=1, num=GUI_WIDTH)
 
-        self.prog = ctx.program(vertex_shader=wave_vertex_shader, fragment_shader=wave_fragment_shader)
+        self.prog = ctx.program(
+            vertex_shader=wave_vertex_shader, fragment_shader=wave_fragment_shader
+        )
         self.buffer = ctx.buffer(reserve=self.uv_plot.nbytes * 3, dynamic=True)
         self.vao = ctx.vertex_array(self.prog, self.buffer, "in_position")
         self.draw()
@@ -27,8 +28,10 @@ class TimeSeries:
         self.uv_plot.fill(0)
 
     def add(self, new_wave_data) -> None:
-        self.logger.info(f"TIMESERIES: Recvd data for buffer (no. of channels: {new_wave_data.shape[0]}), " 
-                    f"no. of data points in each channel: {new_wave_data.shape[1]}")
+        self.logger.info(
+            f"TIMESERIES: Recvd data for buffer (no. of channels: {new_wave_data.shape[0]}), "
+            f"no. of data points in each channel: {new_wave_data.shape[1]}"
+        )
         self.__add_new_wave(new_wave_data=new_wave_data)
 
     def draw(self) -> None:
@@ -43,8 +46,8 @@ class TimeSeries:
         positions = np.stack(arrays=[x_vals, y_norm], axis=-1).reshape(-1, 2)
         self.buffer.write(positions.astype("f4"))
         for i in range(channels):
-            self.prog['u_channel_index'].value = float(i)
-            self.vao.render(moderngl.LINE_STRIP, vertices=width, first=i*width)
+            self.prog["u_channel_index"].value = float(i)
+            self.vao.render(moderngl.LINE_STRIP, vertices=width, first=i * width)
 
         self.logger.info("TIMESERIES: Drawing")
 

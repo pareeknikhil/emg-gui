@@ -8,5 +8,6 @@ def main() -> None:
     cyton_board: DataSource = RealOpenBCI.get_instance(logger)
     EMGSignalAnalyzer.run(logger, cyton_board)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()

@@ -1,13 +1,25 @@
 import moderngl
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QSurfaceFormat
-from PyQt5.QtWidgets import (QAction, QApplication, QLabel, QMenu,
-                             QOpenGLWidget, QPushButton, QShortcut,
-                             QToolButton)
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QLabel,
+    QMenu,
+    QOpenGLWidget,
+    QPushButton,
+    QShortcut,
+    QToolButton,
+)
 from typing_extensions import override
 
-from emg_gui.configs.constants import (FRAME_RATE, GUI_HEIGHT, GUI_WIDTH,
-                                       HOP_SIZE, SPECTROGRAM_WINDOW)
+from emg_gui.configs.constants import (
+    FRAME_RATE,
+    GUI_HEIGHT,
+    GUI_WIDTH,
+    HOP_SIZE,
+    SPECTROGRAM_WINDOW,
+)
 from emg_gui.core.enums import ActivityState, RecordingState
 from emg_gui.utils.tfrecord_utils import get_all_labels
 from emg_gui.visualizer.data_source import DataSource
@@ -16,7 +28,6 @@ from emg_gui.visualizer.time_series import TimeSeries
 
 
 class EMGSignalAnalyzer(QOpenGLWidget):
-
     def __init__(self, logger, data_source: DataSource) -> None:
 
         super().__init__()
@@ -28,7 +39,7 @@ class EMGSignalAnalyzer(QOpenGLWidget):
         self.setFixedSize(GUI_WIDTH, GUI_HEIGHT)
 
         _fmt = QSurfaceFormat()
-        _fmt.setVersion(3,3)
+        _fmt.setVersion(3, 3)
         _fmt.setProfile(QSurfaceFormat.CoreProfile)
         _fmt.setDefaultFormat(_fmt)
         _fmt.setSamples(4)
@@ -38,12 +49,11 @@ class EMGSignalAnalyzer(QOpenGLWidget):
 
         self.__timer = QTimer()
         self.__timer.timeout.connect(self.update)
-        self.__timer.start(int(1000/FRAME_RATE))
+        self.__timer.start(int(1000 / FRAME_RATE))
 
         self.add_buttons()
 
         self.logger.info("WINDOW: Initialized EMG Signal Analyzer...")
-        
 
     def add_buttons(self) -> None:
         self.start_button = QPushButton("Start Recording", self)
@@ -75,7 +85,7 @@ class EMGSignalAnalyzer(QOpenGLWidget):
             items=["train", "validate", "test"],
             color="blue",
             position=(0, 0),
-            callback=self.on_type_selected
+            callback=self.on_type_selected,
         )
 
         self.dropdown = self.create_dropdown_button(
@@ -83,10 +93,12 @@ class EMGSignalAnalyzer(QOpenGLWidget):
             items=get_all_labels(),
             color="brown",
             position=(80, 0),
-            callback=self.on_activity_selected
+            callback=self.on_activity_selected,
         )
 
-    def create_dropdown_button(self, label, items, color, position, callback) -> QToolButton:
+    def create_dropdown_button(
+        self, label, items, color, position, callback
+    ) -> QToolButton:
         button = QToolButton(self)
         button.setText(label)
         button.setPopupMode(QToolButton.MenuButtonPopup)
@@ -120,14 +132,17 @@ class EMGSignalAnalyzer(QOpenGLWidget):
             self.start_button.setText("Stop Recording")
             self.start_button.setStyleSheet(self.get_stylesheet(color="red"))
             return
-        
+
         self.data_source.stop_recording()
         self.timer.stop()
 
         self.label.setText(f"{self.remaining_time}")
         self.start_button.setText("Start Recording")
         self.start_button.setStyleSheet(self.get_stylesheet(color="green"))
-        self.data_source.write_to_disk(self.selected_type, self.location, )
+        self.data_source.write_to_disk(
+            self.selected_type,
+            self.location,
+        )
 
     def on_activity(self) -> None:
 
@@ -158,7 +173,7 @@ class EMGSignalAnalyzer(QOpenGLWidget):
     @override
     def initializeGL(self) -> None:
         self.ctx = moderngl.create_context(require=330)
-        self.ctx.enable(moderngl.BLEND) 
+        self.ctx.enable(moderngl.BLEND)
         self.ctx.multisample = True
 
         emg_channel_count = self.data_source.get_count_emg_channels()
@@ -168,7 +183,6 @@ class EMGSignalAnalyzer(QOpenGLWidget):
         self.spec_series = Spectrogram(self.ctx, 40, 80, self.logger, emg_channel_count)
 
         self.data_source.start_stream()
-
 
     @override
     def resizeGL(self, w, h) -> None:
@@ -183,7 +197,9 @@ class EMGSignalAnalyzer(QOpenGLWidget):
         self.time_series.add(new_wave_data=emg_data)
         self.time_series.draw()
 
-        filtrd_emg = self.time_series.get_filtrd_emg(n_latest_samples=SPECTROGRAM_WINDOW)
+        filtrd_emg = self.time_series.get_filtrd_emg(
+            n_latest_samples=SPECTROGRAM_WINDOW
+        )
 
         self.spec_series.add(filtrd_emg)
         self.spec_series.draw()
