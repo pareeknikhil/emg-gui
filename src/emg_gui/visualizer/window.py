@@ -1,13 +1,25 @@
 import moderngl
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QSurfaceFormat
-from PyQt5.QtWidgets import (QAction, QApplication, QLabel, QMenu,
-                             QOpenGLWidget, QPushButton, QShortcut,
-                             QToolButton)
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QLabel,
+    QMenu,
+    QOpenGLWidget,
+    QPushButton,
+    QShortcut,
+    QToolButton,
+)
 from typing_extensions import override
 
-from emg_gui.configs.constants import (FRAME_RATE, GUI_HEIGHT, GUI_WIDTH,
-                                       HOP_SIZE, SPECTROGRAM_WINDOW)
+from emg_gui.configs.constants import (
+    FRAME_RATE,
+    GUI_HEIGHT,
+    GUI_WIDTH,
+    HOP_SIZE,
+    SPECTROGRAM_WINDOW,
+)
 from emg_gui.core.enums import ActivityState, DatasetSplit, RecordingState
 from emg_gui.utils.tfrecord_utils import get_all_labels
 from emg_gui.visualizer.data_source import DataSource
