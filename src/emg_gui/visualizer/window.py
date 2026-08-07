@@ -20,7 +20,7 @@ from emg_gui.configs.constants import (
     HOP_SIZE,
     SPECTROGRAM_WINDOW,
 )
-from emg_gui.core.enums import ActivityState, RecordingState
+from emg_gui.core.enums import ActivityState, DatasetSplit, RecordingState
 from emg_gui.utils.tfrecord_utils import get_all_labels
 from emg_gui.visualizer.data_source import DataSource
 from emg_gui.visualizer.spectrogram import Spectrogram
@@ -82,7 +82,7 @@ class EMGSignalAnalyzer(QOpenGLWidget):
 
         self.type_dropdown = self.create_dropdown_button(
             label="Type",
-            items=["train", "validate", "test"],
+            items=[data_split.value for data_split in DatasetSplit],
             color="blue",
             position=(0, 0),
             callback=self.on_type_selected,

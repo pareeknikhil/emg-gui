@@ -9,3 +9,9 @@ class RecordingState(Enum):
 class ActivityState(Enum):
     ACTIVE = auto()
     INACTIVE = auto()
+
+
+class DatasetSplit(str, Enum):
+    TRAIN = "train"
+    VALIDATE = "validate"
+    TEST = "test"
