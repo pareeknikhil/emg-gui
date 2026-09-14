@@ -139,9 +139,9 @@ using ModernGL and is distributed under the
 
 1. Add ticks and x-y axis
 2. Screen generalization: parameters
-3. Equal containers 8 visualization height generalization (no hard coded distances)
+3. Equal containers 8 visualization height generalization (no hardcoded distances)
 4. Improve the GUI toggle controls and expose their options in the left sidebar.
-5. Add setup and installation instructions to this README.
+5. Add setup and installation instructions to this readme.
 6. Investigate rendering latency by comparing the current behavior with the
    initial implementation.
 7. Make GUI sizing and layout independent of screen dimensions.

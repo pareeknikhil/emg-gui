@@ -7,8 +7,12 @@ from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 
 from emg_gui.acquisition.dataset_files import get_all_files
-from emg_gui.config.constants import (IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY,
-                                      MARKER_START_ACTIVITY, SERIAL_PORT_LINUX)
+from emg_gui.config.constants import (
+    IS_SYNTHETIC_BOARD,
+    MARKER_END_ACTIVITY,
+    MARKER_START_ACTIVITY,
+    SERIAL_PORT_LINUX,
+)
 from emg_gui.core.enums import ActivityState, RecordingState, StreamingState
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
@@ -91,7 +95,7 @@ class OpenBCIBoard:
         return cls.__instance
 
     @property
-    def emg_channel_count(self) -> int: 
+    def emg_channel_count(self) -> int:
         return self._emg_channel_count
 
     def start_stream(self) -> None:
@@ -117,9 +121,13 @@ class OpenBCIBoard:
         self._logger.info("DATASOURCE: Data Stream closed successfully")
 
         flush_data = self._board.get_board_data()
-        self._logger.info(f"DATASOURCE: Brainflow ring buffer cleaned: {flush_data.shape[1]}")
+        self._logger.info(
+            f"DATASOURCE: Brainflow ring buffer cleaned: {flush_data.shape[1]}"
+        )
 
-        self._logger.info(f"DATASOURCE: Brainflow ring buffer after cleaning: {self._board.get_board_data_count()}")
+        self._logger.info(
+            f"DATASOURCE: Brainflow ring buffer after cleaning: {self._board.get_board_data_count()}"
+        )
 
         self._streaming_state = StreamingState.IDLE
 
@@ -159,12 +167,16 @@ class OpenBCIBoard:
         return active_channel_data
 
     def extract_emg_data(self, emg_with_marker_data: EMGArray) -> EMGArray:
-        emg_data = emg_with_marker_data[:self.emg_channel_count, :] # assumes marker is last 
+        emg_data = emg_with_marker_data[
+            : self.emg_channel_count, :
+        ]  # assumes marker is last
         return emg_data
 
     def write_to_csv(self, datasplit: str, folder: str) -> None:
         emg_numpy = np.concatenate(self._emg_recording, axis=1)
-        file_path = f"data/csv/{datasplit}/{folder}/{str(int(time.time()))}__{folder}.csv"
+        file_path = (
+            f"data/csv/{datasplit}/{folder}/{str(int(time.time()))}__{folder}.csv"
+        )
         DataFilter.write_file(data=emg_numpy, file_name=file_path, file_mode="w")
         file_ds = get_all_files(
             pattern=f"data/csv/{datasplit}/{folder}/*.csv", shuffle_flag=False
@@ -212,9 +224,11 @@ class PlaybackRecording:
         self.max_idx = self.data.shape[1]
 
         self._data_channels = list(range(self.data.shape[0]))
-        self._emg_channel_count = len(self._data_channels) - 1 # assumes marker is last
+        self._emg_channel_count = len(self._data_channels) - 1  # assumes marker is last
 
-        self._logger.info(f"DATASOURCE: PlaybackRecording - file: {self._file_path} - Channels: {self._data_channels} - EMG Channels Count: {self._emg_channel_count} ")
+        self._logger.info(
+            f"DATASOURCE: PlaybackRecording - file: {self._file_path} - Channels: {self._data_channels} - EMG Channels Count: {self._emg_channel_count} "
+        )
 
         self._streaming_state = StreamingState.IDLE
         self._recording_state = RecordingState.IDLE
@@ -230,9 +244,7 @@ class PlaybackRecording:
         if self.is_streaming:
             raise RuntimeError("DATASOURCE: Playback has already started")
 
-        self._logger.info(
-                        "DATASOURCE: Playback Started (playing-recording)"
-                    )
+        self._logger.info("DATASOURCE: Playback Started (playing-recording)")
         self.current_idx = 0
         self._streaming_state = StreamingState.STREAMING
 
@@ -244,7 +256,7 @@ class PlaybackRecording:
 
         self._streaming_state = StreamingState.IDLE
 
-    def start_recording(self) -> None: 
+    def start_recording(self) -> None:
         if self.is_recording:
             raise RuntimeError("DATASOURCE: Recording has already started")
 
@@ -272,16 +284,20 @@ class PlaybackRecording:
         self._activity_state = ActivityState.INACTIVE
 
     def get_data(self) -> EMGArray:
-        num_of_samples_expctd = 10 # playback speed
+        num_of_samples_expctd = 10  # playback speed
 
         end_idx = min(self.current_idx + num_of_samples_expctd, self.max_idx)
         board_data = self.data[:, self.current_idx : end_idx]
         self.current_idx = end_idx
 
-        return self._add_padding(board_data, len(self._data_channels), num_of_samples_expctd)
+        return self._add_padding(
+            board_data, len(self._data_channels), num_of_samples_expctd
+        )
 
     def extract_emg_data(self, emg_with_marker_data: EMGArray) -> EMGArray:
-        emg_data = emg_with_marker_data[:self.emg_channel_count, :] # assumes marker is last 
+        emg_data = emg_with_marker_data[
+            : self.emg_channel_count, :
+        ]  # assumes marker is last
         return emg_data
 
     @staticmethod
@@ -310,7 +326,7 @@ class PlaybackRecording:
         return None
 
     @property
-    def emg_channel_count(self) -> int: 
+    def emg_channel_count(self) -> int:
         return self._emg_channel_count
 
     @property

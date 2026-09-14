@@ -18,7 +18,7 @@ class EMGVisualizerWindow(QMainWindow):
         self.setWindowTitle("emg-gui")
         self.showMaximized()
 
-        self.control_section = EMGControlPanel() 
+        self.control_section = EMGControlPanel()
 
         self.open_gl_widget = EMGOpenGLWidget(self.logger, board.emg_channel_count)
 
@@ -35,16 +35,24 @@ class EMGVisualizerWindow(QMainWindow):
         self.sensor_worker.moveToThread(self.sensor_thread)
 
         self.control_section.stream_request.connect(self.sensor_worker.stream)
-        self.sensor_worker.stream_changed.connect(self.control_section.set_stream_button_text)
+        self.sensor_worker.stream_changed.connect(
+            self.control_section.set_stream_button_text
+        )
 
         self.control_section.record_request.connect(self.sensor_worker.record)
-        self.sensor_worker.record_changed.connect(self.control_section.set_record_button_text)
+        self.sensor_worker.record_changed.connect(
+            self.control_section.set_record_button_text
+        )
 
         self.control_section.marker_request.connect(self.sensor_worker.marker)
-        self.sensor_worker.marker_changed.connect(self.control_section.set_marker_button_text)
+        self.sensor_worker.marker_changed.connect(
+            self.control_section.set_marker_button_text
+        )
 
         self.control_section.reset_request.connect(self.sensor_worker.reset)
-        self.sensor_worker.reset_changed.connect(self.control_section.set_reset_button_text)
+        self.sensor_worker.reset_changed.connect(
+            self.control_section.set_reset_button_text
+        )
 
         self.open_gl_widget.frame_rendered.connect(self.schedule_next_render)
 
@@ -53,8 +61,12 @@ class EMGVisualizerWindow(QMainWindow):
         QTimer.singleShot(0, self.render_loop)
 
     def render_loop(self) -> None:
-        buffer_snapshot, is_streaming = self.sensor_worker.publish_buffer_snapshot() # buffer snapshot is read-only for GUI/Main thread
-        self.open_gl_widget.submit_snapshot(raw_snapshot=buffer_snapshot, freeze_duplicate_snapshots=is_streaming)
+        buffer_snapshot, is_streaming = (
+            self.sensor_worker.publish_buffer_snapshot()
+        )  # buffer snapshot is read-only for GUI/Main thread
+        self.open_gl_widget.submit_snapshot(
+            raw_snapshot=buffer_snapshot, freeze_duplicate_snapshots=is_streaming
+        )
 
     def schedule_next_render(self) -> None:
         QTimer.singleShot(0, self.render_loop)

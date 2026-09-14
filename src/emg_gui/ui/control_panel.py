@@ -31,7 +31,11 @@ class EMGControlPanel(QGroupBox):
         self.stream_button.clicked.connect(lambda: self.stream_request.emit())
 
         self.record_button = QPushButton("Record")
-        self.record_button.clicked.connect(lambda: self.record_request.emit(self.selected_datasplit, self.selected_folder))
+        self.record_button.clicked.connect(
+            lambda: self.record_request.emit(
+                self.selected_datasplit, self.selected_folder
+            )
+        )
 
         self.marker_button = QPushButton("Start Movement")
         self.marker_button.clicked.connect(lambda: self.marker_request.emit())

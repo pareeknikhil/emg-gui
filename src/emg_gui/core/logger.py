@@ -38,7 +38,6 @@ class ConsoleLogger:
         for handler in handlers:
             self.logger.removeHandler(handler)
             handler.close()
-        self.logger = None
         ConsoleLogger.__instance = None
         print("Logger resources released successfully.")
 

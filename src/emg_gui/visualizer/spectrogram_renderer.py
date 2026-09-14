@@ -7,8 +7,10 @@ from pyrr import Matrix44
 from emg_gui.config.constants import GUI_WIDTH, SPECTROGRAM_WINDOW
 from emg_gui.core.logger import Logger
 from emg_gui.processing.window_functions import get_hann_window
-from emg_gui.visualizer.shaders.shader_loader import (spec_fragment_shader,
-                                                      spec_vertex_shader)
+from emg_gui.visualizer.shaders.shader_loader import (
+    spec_fragment_shader,
+    spec_vertex_shader,
+)
 
 
 class SpectrogramRenderer:
@@ -17,7 +19,14 @@ class SpectrogramRenderer:
     HANN_WINDOW = get_hann_window(window_size=SPECTROGRAM_WINDOW, skew=True)
     HANN_WINDOW.setflags(write=False)
 
-    def __init__(self, logger: Logger, y: int, h: int, number_of_emg_channels: int, moderngl_context: moderngl.Context) -> None:
+    def __init__(
+        self,
+        logger: Logger,
+        y: int,
+        h: int,
+        number_of_emg_channels: int,
+        moderngl_context: moderngl.Context,
+    ) -> None:
         self.logger = logger
 
         self._number_of_emg_channels = number_of_emg_channels
@@ -101,7 +110,7 @@ class SpectrogramRenderer:
     def size(self, w, h) -> None:
         w = GUI_WIDTH
         P = SpectrogramRenderer.orthographic(w, h)
-        self.prog["P"].write(P) # pyright: ignore[reportAttributeAccessIssue]
+        self.prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
 
     def draw(self) -> None:
         self.textures.write(self.frames)
@@ -115,7 +124,6 @@ class SpectrogramRenderer:
         self.textures.release()
         self.vao.release()
         self.logger.info("SPEC: ModernGL GPU resources released")
-
 
     @staticmethod
     def stft_slice(window) -> np.ndarray:

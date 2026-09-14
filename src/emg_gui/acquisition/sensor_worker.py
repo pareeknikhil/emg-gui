@@ -3,8 +3,11 @@ from dvg_ringbuffer import RingBuffer
 from PyQt5.QtCore import QObject, QTimer, pyqtSignal, pyqtSlot
 
 from emg_gui.acquisition.data_source import DataSource
-from emg_gui.config.constants import (EDGE_ARTIFACT_BUFFER, GUI_WIDTH,
-                                      SENSOR_POLL_INTERVAL_MS)
+from emg_gui.config.constants import (
+    EDGE_ARTIFACT_BUFFER,
+    GUI_WIDTH,
+    SENSOR_POLL_INTERVAL_MS,
+)
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 
@@ -21,12 +24,16 @@ class SensorWorker(QObject):
         self.logger = logger
         self.board = board
 
-        _buffer_length = GUI_WIDTH+EDGE_ARTIFACT_BUFFER
+        _buffer_length = GUI_WIDTH + EDGE_ARTIFACT_BUFFER
         self._emg_channel_count = board.emg_channel_count
 
-        self.zero_window = np.zeros((_buffer_length, self._emg_channel_count), dtype=np.float64)
+        self.zero_window = np.zeros(
+            (_buffer_length, self._emg_channel_count), dtype=np.float64
+        )
 
-        self.ring_buffer = RingBuffer(capacity=_buffer_length, dtype= (np.float64, self._emg_channel_count))  # pyright: ignore[reportArgumentType]
+        self.ring_buffer = RingBuffer(
+            capacity=_buffer_length, dtype=(np.float64, self._emg_channel_count)
+        )  # pyright: ignore[reportArgumentType]
         self.ring_buffer.extend(self.zero_window)
 
         self.latest_snapshot = self.zero_window.T.copy(order="C")
@@ -42,7 +49,9 @@ class SensorWorker(QObject):
         emg_data = self.board.extract_emg_data(emg_with_marker_data)
         self.ring_buffer.extend(emg_data.T)
         buffer_copy = self.ring_buffer[:].T.copy(order="C")
-        self.latest_snapshot = buffer_copy # atomic assignment swaps without locks: thread safe
+        self.latest_snapshot = (
+            buffer_copy  # atomic assignment swaps without locks: thread safe
+        )
 
     @pyqtSlot()
     def publish_buffer_snapshot(self) -> tuple[EMGArray, bool]:
@@ -74,21 +83,21 @@ class SensorWorker(QObject):
         if self.board.is_recording:
             self.board.stop_recording()
             self.board.write_to_csv(selected_datasplit, selected_folder)
-            self.record_changed.emit('Record')
+            self.record_changed.emit("Record")
             return
 
         self.board.start_recording()
-        self.record_changed.emit('Recording')
+        self.record_changed.emit("Recording")
 
     @pyqtSlot()
     def marker(self) -> None:
         if self.board.is_active:
             self.board.insert_stop_marker()
-            self.marker_changed.emit('Start Movement')
+            self.marker_changed.emit("Start Movement")
             return
 
         self.board.insert_start_marker()
-        self.marker_changed.emit('Stop Movement')
+        self.marker_changed.emit("Stop Movement")
 
     @pyqtSlot()
     def reset(self) -> None:

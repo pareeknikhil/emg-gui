@@ -37,19 +37,33 @@ class EMGOpenGLWidget(QOpenGLWidget):
     def initializeGL(self) -> None:
         self.modern_gl_context = moderngl.create_context(require=330)
         self.modern_gl_context.enable(moderngl.BLEND)
-        self.time_series = TimeSeriesRenderer(self.logger, self._number_of_emg_channels, self.modern_gl_context)
-        self.spectrogram = SpectrogramRenderer(self.logger, 40, 80, self._number_of_emg_channels, self.modern_gl_context)#create spectrogram instance
+        self.time_series = TimeSeriesRenderer(
+            self.logger, self._number_of_emg_channels, self.modern_gl_context
+        )
+        self.spectrogram = SpectrogramRenderer(
+            self.logger, 40, 80, self._number_of_emg_channels, self.modern_gl_context
+        )  # create spectrogram instance
         self.logger.info("OpenGL: Created opengl resources")
 
     @override
     def paintGL(self) -> None:
-        if self._reference_to_raw_snapshot is None or self._reference_to_filtered_snapshot is None:
+        if (
+            self._reference_to_raw_snapshot is None
+            or self._reference_to_filtered_snapshot is None
+        ):
             return
 
-        self.time_series.draw(self._reference_to_raw_snapshot, self._reference_to_filtered_snapshot)
-        self.spectrogram.add(self._reference_to_filtered_snapshot[:, -SPECTROGRAM_WINDOW:])
+        self.time_series.draw(
+            self._reference_to_raw_snapshot, self._reference_to_filtered_snapshot
+        )
+        self.spectrogram.add(
+            self._reference_to_filtered_snapshot[:, -SPECTROGRAM_WINDOW:]
+        )
         self.spectrogram.draw()
-        self._reference_to_raw_snapshot, self._reference_to_filtered_snapshot = None, None 
+        self._reference_to_raw_snapshot, self._reference_to_filtered_snapshot = (
+            None,
+            None,
+        )
         self.frame_rendered.emit()
 
     @override
@@ -57,7 +71,9 @@ class EMGOpenGLWidget(QOpenGLWidget):
         self.spectrogram.size(w, h)
         self.logger.info(f"WINDOW: Size - {w} , {h}")
 
-    def submit_snapshot(self, raw_snapshot: EMGArray, freeze_duplicate_snapshots: bool) -> None:
+    def submit_snapshot(
+        self, raw_snapshot: EMGArray, freeze_duplicate_snapshots: bool
+    ) -> None:
         if self._last_snapshot_received is raw_snapshot and freeze_duplicate_snapshots:
             self.frame_rendered.emit()
             return

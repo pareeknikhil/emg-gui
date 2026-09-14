@@ -14,5 +14,6 @@ def main() -> None:
         board.release()
         logger.release()
 
+
 if __name__ == "__main__":
     main()
