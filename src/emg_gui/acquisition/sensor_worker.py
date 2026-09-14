@@ -29,7 +29,7 @@ class SensorWorker(QObject):
         )
 
         self.ring_buffer = RingBuffer(
-            capacity=_buffer_length, dtype=(np.float64, self._emg_channel_count) # pyright: ignore[reportArgumentType]
+            capacity=_buffer_length, dtype=(np.float64, self._emg_channel_count)  # pyright: ignore[reportArgumentType]
         )
         self.ring_buffer.extend(self.zero_window)
 

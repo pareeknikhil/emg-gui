@@ -7,12 +7,8 @@ from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 
 from emg_gui.acquisition.dataset_files import get_all_files
-from emg_gui.config.constants import (
-    IS_SYNTHETIC_BOARD,
-    MARKER_END_ACTIVITY,
-    MARKER_START_ACTIVITY,
-    SERIAL_PORT_LINUX,
-)
+from emg_gui.config.constants import (IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY,
+                                      MARKER_START_ACTIVITY, SERIAL_PORT_LINUX)
 from emg_gui.core.enums import ActivityState, RecordingState, StreamingState
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
@@ -227,7 +223,9 @@ class PlaybackRecording:
         self._emg_channel_count = len(self._data_channels) - 1  # assumes marker is last
 
         self._logger.info(
-            f"DATASOURCE: PlaybackRecording - file: {self._file_path} - Channels: {self._data_channels} - EMG Channels Count: {self._emg_channel_count} "
+            f"DATASOURCE: PlaybackRecording - file: {self._file_path} "
+            f"- Channels: {self._data_channels} "
+            f"- EMG Channels Count: {self._emg_channel_count}"
         )
 
         self._streaming_state = StreamingState.IDLE
