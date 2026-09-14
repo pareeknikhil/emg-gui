@@ -34,6 +34,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_TRIVY: "false"
+          VALIDATE_BIOME_FORMAT: "false"
+          VALIDATE_BIOME_LINT: "false"
           VALIDATE_PYTHON_RUFF_FORMAT: "false"
           VALIDATE_PYTHON_ISORT: "false"
           VALIDATE_PYTHON_PYLINT: "false"

@@ -4,33 +4,44 @@ import moderngl
 import numpy as np
 from pyrr import Matrix44
 
-from emg_gui.configs.constants import GUI_WIDTH, SPECTROGRAM_WINDOW
-from emg_gui.shaders.shader_loader import spec_fragment_shader, spec_vertex_shader
-from emg_gui.utils.data_processing import get_hann_window
+from emg_gui.config.constants import GUI_WIDTH, SPECTROGRAM_WINDOW
+from emg_gui.core.logger import Logger
+from emg_gui.processing.window_functions import get_hann_window
+from emg_gui.visualizer.shaders.shader_loader import (
+    spec_fragment_shader,
+    spec_vertex_shader,
+)
 
 
-# Captures 2(assuming 125 samples in one spectrogram-window) Hz to 125 Hz [TECH DEBT: hardcoded]
-class Spectrogram:
+class SpectrogramRenderer:
+
     COLOR_MAP = cm.get_cmap(name="inferno")
     HANN_WINDOW = get_hann_window(window_size=SPECTROGRAM_WINDOW, skew=True)
     HANN_WINDOW.setflags(write=False)
 
-    def __init__(self, ctx, y, h, logger, emg_channel_count: int) -> None:
+    def __init__(
+        self,
+        logger: Logger,
+        y: int,
+        h: int,
+        number_of_emg_channels: int,
+        moderngl_context: moderngl.Context,
+    ) -> None:
         self.logger = logger
 
-        self.num_emg_channels = emg_channel_count
+        self._number_of_emg_channels = number_of_emg_channels
 
         self.frames = np.zeros(
-            (self.num_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, GUI_WIDTH, 3),
+            (self._number_of_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, GUI_WIDTH, 3),
             dtype="u1",
         )
 
-        self.prog = ctx.program(
+        self.prog = moderngl_context.program(
             vertex_shader=spec_vertex_shader, fragment_shader=spec_fragment_shader
         )
 
         vertices = []
-        for i in range(self.num_emg_channels):
+        for i in range(self._number_of_emg_channels):
             y_offset = y + i * 125
             layer = float(i)
             vertices.extend(
@@ -69,59 +80,61 @@ class Spectrogram:
             )
 
         vertices = np.array(vertices, dtype="f4")
-        self.buffer = ctx.buffer(vertices)
-        self.vao = ctx.vertex_array(
+        self.buffer = moderngl_context.buffer(vertices)
+        self.vao = moderngl_context.vertex_array(
             self.prog, [(self.buffer, "2f 2f 1f", "in_position", "in_uv", "in_layer")]
         )
 
-        self.textures = ctx.texture_array(
-            size=(GUI_WIDTH, SPECTROGRAM_WINDOW // 2 + 1, self.num_emg_channels),
+        self.textures = moderngl_context.texture_array(
+            size=(GUI_WIDTH, SPECTROGRAM_WINDOW // 2 + 1, self._number_of_emg_channels),
             components=3,
             data=self.frames,
         )
         self.textures.repeat_x = False
         self.textures.repeat_y = True
 
+        self.logger.info("SPEC: ModernGL GPU resources created")
+
     def reset(self) -> None:
         self.frames = np.zeros(
-            (self.num_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, GUI_WIDTH, 3),
+            (self._number_of_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, GUI_WIDTH, 3),
             dtype="u1",
         )
 
     def add(self, window) -> None:
-        slices = Spectrogram.stft_slice(window)
-        new_slice = Spectrogram.stft_color(slices)
+        slices = SpectrogramRenderer.stft_slice(window)
+        new_slice = SpectrogramRenderer.stft_color(slices)
         self.frames[:, :, :-1, :] = self.frames[:, :, 1:, :]
         self.frames[:, :, -1, :] = new_slice
-        self.logger.info(f"SPEC: Adding window shape {window.shape}")
 
     def size(self, w, h) -> None:
-        P = Spectrogram.orthographic(w, h)
-        self.prog["P"].write(P)
+        w = GUI_WIDTH
+        P = SpectrogramRenderer.orthographic(w, h)
+        self.prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
 
     def draw(self) -> None:
         self.textures.write(self.frames)
         self.textures.use(0)
-        for i in range(self.num_emg_channels):
+        for i in range(self._number_of_emg_channels):
             self.vao.render(mode=moderngl.TRIANGLES, vertices=6, first=i * 6)
-        self.logger.info("SPEC: Spec rendered...")
 
     def release(self) -> None:
         self.prog.release()
         self.buffer.release()
         self.textures.release()
         self.vao.release()
+        self.logger.info("SPEC: ModernGL GPU resources released")
 
     @staticmethod
     def stft_slice(window) -> np.ndarray:
-        return np.fft.rfft(window * Spectrogram.HANN_WINDOW, axis=1)
+        return np.fft.rfft(window * SpectrogramRenderer.HANN_WINDOW, axis=1)
 
     @staticmethod
     def stft_color(slices, min_db=-5, max_db=10):
-        slices = librosa.amplitude_to_db(slices)
+        slices = librosa.amplitude_to_db(np.abs(slices))
         slices = slices.clip(min_db, max_db)
         slices = (slices - min_db) / (max_db - min_db)
-        slices = Spectrogram.COLOR_MAP(slices)
+        slices = SpectrogramRenderer.COLOR_MAP(slices)
         slices = (slices * 255).astype("u1")
         return slices[:, :, :3]
 
