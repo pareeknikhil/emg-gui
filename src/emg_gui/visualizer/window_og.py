@@ -1,28 +1,16 @@
 import moderngl
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QSurfaceFormat
-from PyQt5.QtWidgets import (
-    QAction,
-    QApplication,
-    QLabel,
-    QMenu,
-    QOpenGLWidget,
-    QPushButton,
-    QShortcut,
-    QToolButton,
-)
+from PyQt5.QtWidgets import (QAction, QApplication, QLabel, QMenu,
+                             QOpenGLWidget, QPushButton, QShortcut,
+                             QToolButton)
 from typing_extensions import override
 
-from emg_gui.configs.constants import (
-    FRAME_RATE,
-    GUI_HEIGHT,
-    GUI_WIDTH,
-    HOP_SIZE,
-    SPECTROGRAM_WINDOW,
-)
+from emg_gui.configs.constants import (FRAME_RATE, GUI_HEIGHT, GUI_WIDTH,
+                                       HOP_SIZE, SPECTROGRAM_WINDOW)
 from emg_gui.core.enums import ActivityState, DatasetSplit, RecordingState
-from emg_gui.utils.tfrecord_utils import get_all_labels
-from emg_gui.visualizer.data_source import DataSource
+from emg_gui.utils.dataset_files import get_all_labels
+from emg_gui.visualizer.board_controller import DataSource
 from emg_gui.visualizer.spectrogram import Spectrogram
 from emg_gui.visualizer.time_series import TimeSeries
 
@@ -139,7 +127,7 @@ class EMGSignalAnalyzer(QOpenGLWidget):
         self.label.setText(f"{self.remaining_time}")
         self.start_button.setText("Start Recording")
         self.start_button.setStyleSheet(self.get_stylesheet(color="green"))
-        self.data_source.write_to_disk(
+        self.data_source.write_to_csv(
             self.selected_type,
             self.location,
         )
@@ -166,9 +154,9 @@ class EMGSignalAnalyzer(QOpenGLWidget):
         self.logger.info("WINDOW: Analyzer reset completed")
 
     @override
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, a0) -> None:
         self.close_gui()
-        super().closeEvent(event)
+        super().closeEvent(a0)
 
     @override
     def initializeGL(self) -> None:
@@ -226,7 +214,7 @@ class EMGSignalAnalyzer(QOpenGLWidget):
     @classmethod
     def run(cls, logger, cyton: DataSource) -> None:
         QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-        window = QApplication([])
-        main = cls(logger, cyton)
-        main.show()
-        window.exit(window.exec())
+        q_application = QApplication([])
+        gui = cls(logger, cyton)
+        gui.show()
+        q_application.exit(q_application.exec())

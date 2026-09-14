@@ -67,6 +67,6 @@ emg-gui = "emg_gui.app:main"
 [tool.poetry]
 packages = [{ include = "emg_gui", from = "src" }]
 include = [
-    { path = "src/emg_gui/shaders/**/*.glsl", format = ["sdist", "wheel"] },
-    { path = "src/emg_gui/configs/*.ttf", format = ["sdist", "wheel"] },
+    { path = "src/emg_gui/visualizer/shaders/**/*.glsl", format = ["sdist", "wheel"] },
+    { path = "src/emg_gui/config/*.ttf", format = ["sdist", "wheel"] },
 ]

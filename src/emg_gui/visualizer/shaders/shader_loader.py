@@ -3,7 +3,7 @@ from importlib import resources
 
 def load_shadr_file(*paths: str) -> str:
     return (
-        resources.files("emg_gui.shaders").joinpath(*paths).read_text(encoding="utf-8")
+        resources.files("emg_gui.visualizer.shaders").joinpath(*paths).read_text(encoding="utf-8")
     )
 
 

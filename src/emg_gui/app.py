@@ -1,13 +1,19 @@
-from emg_gui.utils.log_utils import Logger
-from emg_gui.visualizer.data_source import DataSource, RealOpenBCI
-from emg_gui.visualizer.window import EMGSignalAnalyzer
+from emg_gui.acquisition.data_source import (DataSource, OpenBCIBoard,
+                                             PlaybackRecording)
+from emg_gui.core.logger import ConsoleLogger, Logger
+from emg_gui.ui.window import EMGVisualizerWindow
 
 
 def main() -> None:
-    logger = Logger.get_instance()
-    cyton_board: DataSource = RealOpenBCI.get_instance(logger)
-    EMGSignalAnalyzer.run(logger, cyton_board)
+    logger: Logger = ConsoleLogger.get_instance()
+    board: DataSource = OpenBCIBoard.get_instance(logger)
+    # board: DataSource = PlaybackRecording.get_instance(logger, "data/csv/train/sample/1785181476__sample.csv")
 
+    try:
+        EMGVisualizerWindow.run(logger, board)
+    finally:
+        board.release()
+        logger.release()
 
 if __name__ == "__main__":
     main()
