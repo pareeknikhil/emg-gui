@@ -2,11 +2,9 @@
 
 ## 1. Overview
 
-
 ### 1.1 Introduction
 
 A real-time visual engine for acquiring, recording, and exploring raw and filtered EMG signals.
-
 
 ### 1.2 Architecture
 
@@ -35,10 +33,13 @@ EMG GUI
 ```
 
 The `DataSource` provides hardware-independent acquisition from either an
-OpenBCI board or a playback recording. `SensorWorker` reads EMG samples into a
-fixed-size ring buffer, and `EMGOpenGLWidget` owns duplicate-snapshot checks,
-snapshot filtering, and ModernGL rendering. `TimeSeriesRenderer` and
-`SpectrogramRenderer` are connected to the live rendering path.
+OpenBCI board or a playback recording. The current application entry point uses
+`OpenBCIBoard` by default, with playback available as an alternate source.
+`SensorWorker` reads EMG samples into a fixed-size ring buffer, and
+`EMGOpenGLWidget` owns duplicate-snapshot checks, snapshot filtering, and
+ModernGL rendering. `TimeSeriesRenderer` and `SpectrogramRenderer` are connected
+to the live rendering path. Channel counts come from the selected data source,
+so synthetic and real boards can expose different numbers of EMG channels.
 
 See the [architecture guide](docs/architecture.md) for the detailed component
 hierarchy, data flow, and thread interaction sequences.
@@ -136,9 +137,9 @@ using ModernGL and is distributed under the
 
 ## 7. Tech Debt
 
-1. Add ticks and x-y axis 
+1. Add ticks and x-y axis
 2. Screen generalization: parameters
-3. Equal containers 8 visualization height generlaization (no hard coded distances)
+3. Equal containers 8 visualization height generalization (no hard coded distances)
 4. Improve the GUI toggle controls and expose their options in the left sidebar.
 5. Add setup and installation instructions to this README.
 6. Investigate rendering latency by comparing the current behavior with the
@@ -148,6 +149,6 @@ using ModernGL and is distributed under the
 9. Move signal processing from the GUI thread to a dedicated processing thread.
 10. Processing latency in the performance metrics.
 11. Standardize encapsulation naming by using leading underscores for non-public
-   attributes.
+    attributes.
 12. Move the complete data-source lifecycle into the sensor thread, including
-   initialization, streaming, recording, stopping, and release.
+    initialization, streaming, recording, stopping, and release.

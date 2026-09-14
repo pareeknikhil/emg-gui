@@ -1,7 +1,7 @@
 # Architecture
 
 This document describes the current runtime architecture of `emg-gui` and
-identifies connected components, placeholders, and planned extraction points.
+identifies connected components, partial behavior, and planned extraction points.
 
 ## Package Boundaries
 
@@ -35,9 +35,9 @@ visualizer package owns the OpenGL-specific implementation.
 
 - `app.py` creates the shared logger and data source, starts the Qt application,
   and releases both resources after the Qt event loop exits.
-- `DataSource` defines the acquisition interface. `PlaybackRecording` is
-  currently selected by `app.py`; `OpenBCIBoard` is the real-board
-  implementation and delegates hardware access to BrainFlow's `BoardShim`.
+- `DataSource` defines the acquisition interface. `OpenBCIBoard` is currently
+  selected by `app.py` and delegates board access to BrainFlow's `BoardShim`.
+  `PlaybackRecording` is available as an alternate file-backed implementation.
 - `EMGVisualizerWindow` creates the control panel, sensor worker, sensor thread,
   and OpenGL widget. It also coordinates the self-scheduling rendering loop.
 - `EMGControlPanel` owns the buttons and dataset selectors. It emits requests
@@ -58,7 +58,7 @@ visualizer package owns the OpenGL-specific implementation.
 Status labels distinguish active runtime components from unfinished work:
 
 - **Current**: implemented and connected to the active runtime.
-- **Placeholder**: connected, but its behavior is not implemented.
+- **Partial**: connected, but not all intended behavior is implemented.
 - **Available**: implemented, but not connected to the active runtime.
 - **Planned**: intended responsibility without a current implementation.
 
@@ -67,15 +67,15 @@ emg-gui
 └── app.py [current]
     ├── ConsoleLogger [current]
     ├── DataSource protocol [current]
-    │   ├── OpenBCIBoard [available, not selected by app.py]
+    │   ├── OpenBCIBoard [current]
     │   │   └── BrainFlow BoardShim
-    │   └── PlaybackRecording [current]
+    │   └── PlaybackRecording [available, not selected by app.py]
     └── EMGVisualizerWindow (QMainWindow) [current]
         ├── EMGControlPanel [current]
         │   ├── Stream control [current]
-        │   ├── Recording control [worker behavior is a placeholder]
-        │   ├── Movement marker control [worker behavior is a placeholder]
-        │   ├── Reset control [worker behavior is a placeholder]
+        │   ├── Recording control [current]
+        │   ├── Movement marker control [current]
+        │   ├── Reset control [partial: display buffer only]
         │   └── Dataset and recording-folder selection [current]
         ├── SensorThread (QThread) [current]
         │   └── SensorWorker [current]
@@ -105,19 +105,20 @@ emg-gui
 
 The acquisition and rendering stages intentionally use different orientations:
 
-| Stage | Shape | Memory purpose |
-| --- | --- | --- |
-| `DataSource.get_data()` | `(data_rows, new_samples)` | Channel-major batch containing EMG rows and the marker row |
-| `DataSource.extract_emg_data()` | `(emg_channels, new_samples)` | EMG-only batch used by the display ring buffer |
-| `SensorWorker.ring_buffer` | `(buffer_samples, emg_channels)` | DvG RingBuffer elements are one sample across all EMG channels |
-| `SensorWorker.latest_snapshot` | `(emg_channels, buffer_samples)` | Independent, C-contiguous snapshot used by the GUI |
-| OpenGL raw and filtered snapshots | `(emg_channels, GUI_WIDTH)` | Edge-artifact prefix removed before rendering |
+| Stage                             | Shape                            | Memory purpose                                                 |
+| --------------------------------- | -------------------------------- | -------------------------------------------------------------- |
+| `DataSource.get_data()`           | `(data_rows, new_samples)`       | Channel-major batch containing EMG rows and the marker row     |
+| `DataSource.extract_emg_data()`   | `(emg_channels, new_samples)`    | EMG-only batch used by the display ring buffer                 |
+| `SensorWorker.ring_buffer`        | `(buffer_samples, emg_channels)` | DvG RingBuffer elements are one sample across all EMG channels |
+| `SensorWorker.latest_snapshot`    | `(emg_channels, buffer_samples)` | Independent, C-contiguous snapshot used by the GUI             |
+| OpenGL raw and filtered snapshots | `(emg_channels, GUI_WIDTH)`      | Edge-artifact prefix removed before rendering                  |
 
 With the current constants, `buffer_samples` is
 `GUI_WIDTH + EDGE_ARTIFACT_BUFFER`, or `1,700`, and the rendered width is
-`1,200`. The current Cyton-oriented board configuration uses eight EMG channels
-and one marker channel. Playback recordings are also treated as EMG rows plus a
-final marker row. Only EMG rows enter the display ring buffer.
+`1,200`. The selected data source determines the EMG channel count. A Cyton board
+exposes eight EMG channels, while BrainFlow's synthetic board exposes more EMG
+channels. In both live and playback paths, the worker expects data rows to be EMG
+rows plus a final marker row. Only EMG rows enter the display ring buffer.
 
 ## Data Flow
 
@@ -136,11 +137,13 @@ flowchart LR
 
     subgraph sensor["Sensor thread"]
         source["DataSource.get_data()<br/>EMG + marker rows x new samples"]
+        record["DataSource.record()<br/>append EMG + marker batch if recording"]
         extract["DataSource.extract_emg_data()<br/>EMG rows x new samples"]
         transpose["Transpose for RingBuffer"]
         ring["DvG RingBuffer<br/>1,700 x EMG channels"]
         latest["latest_snapshot<br/>EMG channels x 1,700"]
 
+        source --> record
         source --> extract --> transpose
         transpose -->|"new samples x EMG channels"| ring
         ring -->|"transpose and C-order copy"| latest
@@ -192,16 +195,17 @@ texture history, writes a new STFT color slice, and draws the spectrogram layer.
 
 ## Thread Model
 
-| Operation | Thread |
-| --- | --- |
-| Construct logger and selected `DataSource` | Main thread, before the Qt event loop |
-| Control-panel button handling | GUI thread |
-| `SensorWorker.stream()` and `receive_sensor_data()` | Sensor thread |
-| Data-source stream control and `get_data()` | Sensor thread during normal operation |
-| Read `SensorWorker.latest_snapshot` reference | GUI thread through a direct Python call |
-| Filtering and array preparation | GUI thread |
-| `QOpenGLWidget` and ModernGL rendering | GUI thread |
-| Final board and logger release | Main thread after the Qt event loop exits |
+| Operation                                           | Thread                                    |
+| --------------------------------------------------- | ----------------------------------------- |
+| Construct logger and selected `DataSource`          | Main thread, before the Qt event loop     |
+| Control-panel button handling                       | GUI thread                                |
+| `SensorWorker.stream()` and `receive_sensor_data()` | Sensor thread                             |
+| Record, marker, and reset worker slots              | Sensor thread                             |
+| Data-source stream control and `get_data()`         | Sensor thread during normal operation     |
+| Read `SensorWorker.latest_snapshot` reference       | GUI thread through a direct Python call   |
+| Filtering and array preparation                     | GUI thread                                |
+| `QOpenGLWidget` and ModernGL rendering              | GUI thread                                |
+| Final board and logger release                      | Main thread after the Qt event loop exits |
 
 Qt delivers control-panel signals to `SensorWorker` through the sensor thread's
 event queue because the worker has been moved to that thread. In contrast,
@@ -236,8 +240,11 @@ sequenceDiagram
     Panel->>Panel: Update stream-button text
 ```
 
-The record, marker, and reset buttons use the same queued signal route, but
-their `SensorWorker` slots are currently placeholders.
+The record, marker, and reset buttons use the same queued signal route. Recording
+toggles the data-source recording state and writes accumulated EMG-plus-marker
+batches to CSV when stopped. Marker control inserts start/stop markers for the
+live board implementation and updates activity state. Reset currently clears the
+sensor worker's display ring buffer.
 
 ## Polling and Rendering Sequence
 
@@ -260,6 +267,7 @@ sequenceDiagram
             Timer->>Worker: receive_sensor_data()
             Worker->>Source: get_data()
             Source-->>Worker: EMG + marker rows x new samples
+            Worker->>Source: record(EMG + marker rows)
             Worker->>Source: extract_emg_data()
             Source-->>Worker: EMG rows x new samples
             Worker->>Worker: Extend display ring buffer
@@ -301,16 +309,22 @@ sequenceDiagram
     autonumber
     actor User
     participant Window as EMGVisualizerWindow
+    participant Worker as SensorWorker
     participant Thread as SensorThread
+    participant GL as EMGOpenGLWidget
     participant App as app.py
     participant Source as DataSource
     participant Logger as ConsoleLogger
 
     User->>Window: Close window
+    Window->>Worker: shutdown_timer() via BlockingQueuedConnection
+    Worker->>Worker: Stop active sensor QTimer
     Window->>Thread: quit()
     Window->>Thread: wait()
     Note over Window,Thread: A running worker slot must return before the thread finishes
     Thread-->>Window: Thread event loop finished
+    Window->>GL: release()
+    GL->>GL: Release renderer and ModernGL resources
     Window-->>App: Qt event loop exits
     App->>Source: release()
     Note over Source: OpenBCIBoard stops active streams and releases BoardShim; PlaybackRecording no-ops
@@ -319,11 +333,10 @@ sequenceDiagram
 
 ## Current Limitations
 
-- Recording, marker, and reset requests are connected, but their worker slots
-  are not implemented.
+- Reset currently clears the sensor worker's display ring buffer, but does not
+  yet reset the spectrogram renderer history.
 - Filtering currently runs inside `EMGOpenGLWidget` on the GUI thread. A separate
   signal processor remains a planned extraction point.
-- OpenGL resource cleanup is not yet connected to the Qt context-destruction
-  lifecycle.
-- Channel discovery is still hardcoded to the Cyton board descriptor, even when
-  the synthetic board is selected.
+- Playback recording and CSV writing are currently no-ops.
+- The time-series and spectrogram layout still use hardcoded per-channel spacing,
+  so board-dependent channel counts can exceed the visible layout.

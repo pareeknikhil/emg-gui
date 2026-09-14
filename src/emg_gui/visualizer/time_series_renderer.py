@@ -1,5 +1,3 @@
-from curses import raw
-
 import moderngl
 import numpy as np
 
