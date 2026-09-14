@@ -7,8 +7,12 @@ from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 
 from emg_gui.acquisition.dataset_files import get_all_files
-from emg_gui.config.constants import (IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY,
-                                      MARKER_START_ACTIVITY, SERIAL_PORT_LINUX)
+from emg_gui.config.constants import (
+    IS_SYNTHETIC_BOARD,
+    MARKER_END_ACTIVITY,
+    MARKER_START_ACTIVITY,
+    SERIAL_PORT_LINUX,
+)
 from emg_gui.core.enums import ActivityState, RecordingState, StreamingState
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray

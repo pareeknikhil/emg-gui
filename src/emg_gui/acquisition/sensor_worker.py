@@ -3,8 +3,11 @@ from dvg_ringbuffer import RingBuffer
 from PyQt5.QtCore import QObject, QTimer, pyqtSignal, pyqtSlot
 
 from emg_gui.acquisition.data_source import DataSource
-from emg_gui.config.constants import (EDGE_ARTIFACT_BUFFER, GUI_WIDTH,
-                                      SENSOR_POLL_INTERVAL_MS)
+from emg_gui.config.constants import (
+    EDGE_ARTIFACT_BUFFER,
+    GUI_WIDTH,
+    SENSOR_POLL_INTERVAL_MS,
+)
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 
@@ -29,7 +32,11 @@ class SensorWorker(QObject):
         )
 
         self.ring_buffer = RingBuffer(
-            capacity=_buffer_length, dtype=(np.float64, self._emg_channel_count)  # pyright: ignore[reportArgumentType]
+            capacity=_buffer_length,
+            dtype=(
+                np.float64,
+                self._emg_channel_count,
+            ),  # pyright: ignore[reportArgumentType]
         )
         self.ring_buffer.extend(self.zero_window)
 
