@@ -1,6 +1,5 @@
 from brainflow.board_shim import BoardIds, BoardShim
-from brainflow.data_filter import (AggOperations, DataFilter, FilterTypes,
-                                   NoiseTypes)
+from brainflow.data_filter import AggOperations, DataFilter, FilterTypes, NoiseTypes
 
 from emg_gui.config.constants import IS_SYNTHETIC_BOARD
 from emg_gui.core.types import EMGArray

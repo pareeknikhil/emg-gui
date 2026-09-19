@@ -7,8 +7,10 @@ from pyrr import Matrix44
 from emg_gui.config.constants import SPECTROGRAM_WINDOW, TIME_WINDOW_SAMPLES
 from emg_gui.core.logger import Logger
 from emg_gui.processing.window_functions import get_hann_window
-from emg_gui.visualizer.shaders.shader_loader import (spec_fragment_shader,
-                                                      spec_vertex_shader)
+from emg_gui.visualizer.shaders.shader_loader import (
+    spec_fragment_shader,
+    spec_vertex_shader,
+)
 
 
 class SpectrogramRenderer:
@@ -28,7 +30,12 @@ class SpectrogramRenderer:
         self._number_of_emg_channels = number_of_emg_channels
 
         self._frames = np.zeros(
-            (self._number_of_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, TIME_WINDOW_SAMPLES, 3),
+            (
+                self._number_of_emg_channels,
+                SPECTROGRAM_WINDOW // 2 + 1,
+                TIME_WINDOW_SAMPLES,
+                3,
+            ),
             dtype="u1",
         )
 
@@ -55,7 +62,11 @@ class SpectrogramRenderer:
         )
 
         self._textures = moderngl_context.texture_array(
-            size=(TIME_WINDOW_SAMPLES, SPECTROGRAM_WINDOW // 2 + 1, self._number_of_emg_channels),
+            size=(
+                TIME_WINDOW_SAMPLES,
+                SPECTROGRAM_WINDOW // 2 + 1,
+                self._number_of_emg_channels,
+            ),
             components=3,
             data=self._frames,
         )
@@ -66,7 +77,12 @@ class SpectrogramRenderer:
 
     def reset(self) -> None:
         self._frames = np.zeros(
-            (self._number_of_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, TIME_WINDOW_SAMPLES, 3),
+            (
+                self._number_of_emg_channels,
+                SPECTROGRAM_WINDOW // 2 + 1,
+                TIME_WINDOW_SAMPLES,
+                3,
+            ),
             dtype="u1",
         )
 
@@ -97,13 +113,36 @@ class SpectrogramRenderer:
 
             vertices.extend(
                 [
-                    0, y_top, 0, 1, layer,
-                    0, y_bottom, 0, 0, layer,
-                    widget_width, y_bottom, 1, 0, layer,
-
-                    0, y_top, 0, 1, layer,
-                    widget_width, y_bottom, 1, 0, layer,
-                    widget_width, y_top, 1, 1, layer,
+                    0,
+                    y_top,
+                    0,
+                    1,
+                    layer,
+                    0,
+                    y_bottom,
+                    0,
+                    0,
+                    layer,
+                    widget_width,
+                    y_bottom,
+                    1,
+                    0,
+                    layer,
+                    0,
+                    y_top,
+                    0,
+                    1,
+                    layer,
+                    widget_width,
+                    y_bottom,
+                    1,
+                    0,
+                    layer,
+                    widget_width,
+                    y_top,
+                    1,
+                    1,
+                    layer,
                 ]
             )
 

@@ -3,9 +3,11 @@ from dvg_ringbuffer import RingBuffer
 from PyQt5.QtCore import QObject, QTimer, pyqtSignal, pyqtSlot
 
 from emg_gui.acquisition.data_source import DataSource
-from emg_gui.config.constants import (EDGE_ARTIFACT_BUFFER,
-                                      SENSOR_POLL_INTERVAL_MS,
-                                      TIME_WINDOW_SAMPLES)
+from emg_gui.config.constants import (
+    EDGE_ARTIFACT_BUFFER,
+    SENSOR_POLL_INTERVAL_MS,
+    TIME_WINDOW_SAMPLES,
+)
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 

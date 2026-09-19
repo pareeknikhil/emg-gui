@@ -4,8 +4,10 @@ import numpy as np
 from emg_gui.config.constants import TIME_WINDOW_SAMPLES
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
-from emg_gui.visualizer.shaders.shader_loader import (wave_fragment_shader,
-                                                      wave_vertex_shader)
+from emg_gui.visualizer.shaders.shader_loader import (
+    wave_fragment_shader,
+    wave_vertex_shader,
+)
 
 
 class TimeSeriesRenderer:
@@ -27,13 +29,17 @@ class TimeSeriesRenderer:
 
         self._logger = logger
 
-        self._x_points = np.linspace(start=-1, stop=1, num=TIME_WINDOW_SAMPLES, dtype="f4")
+        self._x_points = np.linspace(
+            start=-1, stop=1, num=TIME_WINDOW_SAMPLES, dtype="f4"
+        )
 
         self._prog = moderngl_context.program(
             vertex_shader=wave_vertex_shader, fragment_shader=wave_fragment_shader
         )
         self._buffer = moderngl_context.buffer(reserve=_buffer_size, dynamic=True)
-        self._vao = moderngl_context.vertex_array(self._prog, self._buffer, "in_position")
+        self._vao = moderngl_context.vertex_array(
+            self._prog, self._buffer, "in_position"
+        )
 
         self._logger.info("TIMESERIES: ModernGL GPU resources created")
 
