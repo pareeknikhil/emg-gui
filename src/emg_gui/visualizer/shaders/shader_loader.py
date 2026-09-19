@@ -1,7 +1,7 @@
 from importlib import resources
 
 
-def load_shadr_file(*paths: str) -> str:
+def _load_shader_file(*paths: str) -> str:
     return (
         resources.files("emg_gui.visualizer.shaders")
         .joinpath(*paths)
@@ -9,10 +9,10 @@ def load_shadr_file(*paths: str) -> str:
     )
 
 
-wave_vertex_shader = load_shadr_file("wave", "vertex.glsl")
+wave_vertex_shader = _load_shader_file("wave", "vertex.glsl")
 
-wave_fragment_shader = load_shadr_file("wave", "fragment.glsl")
+wave_fragment_shader = _load_shader_file("wave", "fragment.glsl")
 
-spec_vertex_shader = load_shadr_file("spec", "vertex.glsl")
+spec_vertex_shader = _load_shader_file("spec", "vertex.glsl")
 
-spec_fragment_shader = load_shadr_file("spec", "fragment.glsl")
+spec_fragment_shader = _load_shader_file("spec", "fragment.glsl")

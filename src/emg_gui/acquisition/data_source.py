@@ -7,12 +7,8 @@ from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 
 from emg_gui.acquisition.dataset_files import get_all_files
-from emg_gui.config.constants import (
-    IS_SYNTHETIC_BOARD,
-    MARKER_END_ACTIVITY,
-    MARKER_START_ACTIVITY,
-    SERIAL_PORT_LINUX,
-)
+from emg_gui.config.constants import (IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY,
+                                      MARKER_START_ACTIVITY, SERIAL_PORT_LINUX)
 from emg_gui.core.enums import ActivityState, RecordingState, StreamingState
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
@@ -56,9 +52,9 @@ class DataSource(Protocol):
 
 
 class OpenBCIBoard:
-    BOARDID = BoardIds.SYNTHETIC_BOARD if IS_SYNTHETIC_BOARD else BoardIds.CYTON_BOARD
+    _BOARD_ID = BoardIds.SYNTHETIC_BOARD if IS_SYNTHETIC_BOARD else BoardIds.CYTON_BOARD
 
-    __instance = None
+    _instance = None
 
     def __init__(self, logger: Logger) -> None:
         BoardShim.enable_dev_board_logger()
@@ -67,13 +63,13 @@ class OpenBCIBoard:
         _params = BrainFlowInputParams()
         _params.serial_port = SERIAL_PORT_LINUX
 
-        self._brainflow_emg_channels = BoardShim.get_emg_channels(board_id=self.BOARDID)
-        brainflow_marker_channel = BoardShim.get_marker_channel(board_id=self.BOARDID)
+        self._brainflow_emg_channels = BoardShim.get_emg_channels(board_id=self._BOARD_ID)
+        brainflow_marker_channel = BoardShim.get_marker_channel(board_id=self._BOARD_ID)
 
         self._data_channels = self._brainflow_emg_channels + [brainflow_marker_channel]
         self._emg_channel_count = len(self._brainflow_emg_channels)
 
-        self._board = BoardShim(board_id=self.BOARDID, input_params=_params)
+        self._board = BoardShim(board_id=self._BOARD_ID, input_params=_params)
         self._board.prepare_session()
         if not self._board.is_prepared():
             self._logger.error("DATASOURCE: Board cannot be initialized")
@@ -90,9 +86,9 @@ class OpenBCIBoard:
 
     @classmethod
     def get_instance(cls, logger: Logger) -> DataSource:
-        if cls.__instance is None:
-            cls.__instance = cls(logger)
-        return cls.__instance
+        if cls._instance is None:
+            cls._instance = cls(logger)
+        return cls._instance
 
     @property
     def emg_channel_count(self) -> int:
@@ -213,17 +209,17 @@ class OpenBCIBoard:
 
 
 class PlaybackRecording:
-    __instance = None
+    _instance = None
 
     def __init__(self, logger: Logger, file_path: str) -> None:
         self._logger = logger
         self._file_path = file_path
 
-        self.data = np.loadtxt(self._file_path, delimiter="\t").T
-        self.current_idx = 0
-        self.max_idx = self.data.shape[1]
+        self._data = np.loadtxt(self._file_path, delimiter="\t").T
+        self._current_idx = 0
+        self._max_idx = self._data.shape[1]
 
-        self._data_channels = list(range(self.data.shape[0]))
+        self._data_channels = list(range(self._data.shape[0]))
         self._emg_channel_count = len(self._data_channels) - 1  # assumes marker is last
 
         self._logger.info(
@@ -238,16 +234,16 @@ class PlaybackRecording:
 
     @classmethod
     def get_instance(cls, logger: Logger, file_path: str) -> DataSource:
-        if cls.__instance is None:
-            cls.__instance = cls(logger, file_path)
-        return cls.__instance
+        if cls._instance is None:
+            cls._instance = cls(logger, file_path)
+        return cls._instance
 
     def start_stream(self) -> None:
         if self.is_streaming:
             raise RuntimeError("DATASOURCE: Playback has already started")
 
         self._logger.info("DATASOURCE: Playback Started (playing-recording)")
-        self.current_idx = 0
+        self._current_idx = 0
         self._streaming_state = StreamingState.STREAMING
 
     def stop_stream(self) -> None:
@@ -288,9 +284,9 @@ class PlaybackRecording:
     def get_data(self) -> EMGArray:
         num_of_samples_expctd = 10  # playback speed
 
-        end_idx = min(self.current_idx + num_of_samples_expctd, self.max_idx)
-        board_data = self.data[:, self.current_idx : end_idx]
-        self.current_idx = end_idx
+        end_idx = min(self._current_idx + num_of_samples_expctd, self._max_idx)
+        board_data = self._data[:, self._current_idx : end_idx]
+        self._current_idx = end_idx
 
         return self._add_padding(
             board_data, len(self._data_channels), num_of_samples_expctd

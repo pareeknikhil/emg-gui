@@ -138,17 +138,10 @@ using ModernGL and is distributed under the
 ## 7. Tech Debt
 
 1. Add ticks and x-y axis
-2. Screen generalization: parameters
-3. Equal containers 8 visualization height generalization (no hardcoded distances)
-4. Improve the GUI toggle controls and expose their options in the left sidebar.
-5. Add setup and installation instructions to this readme.
-6. Investigate rendering latency by comparing the current behavior with the
-   initial implementation.
-7. Make GUI sizing and layout independent of screen dimensions.
-8. Add timer and countdown visualizations.
-9. Move signal processing from the GUI thread to a dedicated processing thread.
-10. Processing latency in the performance metrics.
-11. Standardize encapsulation naming by using leading underscores for non-public
-    attributes.
-12. Move the complete data-source lifecycle into the sensor thread, including
-    initialization, streaming, recording, stopping, and release.
+2. Improve the GUI toggle controls and expose their options in the left sidebar.
+3. Add setup and installation instructions to this readme.
+4. Investigate rendering latency by comparing the current behavior with the initial implementation.
+5. Add timer and countdown visualizations.
+6. Move signal processing from the GUI thread to a dedicated processing thread.
+7. Processing latency in the performance metrics.
+8. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.

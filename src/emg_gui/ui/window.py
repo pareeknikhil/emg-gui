@@ -13,75 +13,75 @@ class EMGVisualizerWindow(QMainWindow):
     def __init__(self, logger: Logger, board: DataSource) -> None:
         super().__init__()
 
-        self.logger = logger
+        self._logger = logger
 
         self.setWindowTitle("emg-gui")
         self.showMaximized()
 
-        self.control_section = EMGControlPanel()
+        self._control_section = EMGControlPanel()
 
-        self.open_gl_widget = EMGOpenGLWidget(self.logger, board.emg_channel_count)
+        self._open_gl_widget = EMGOpenGLWidget(self._logger, board.emg_channel_count)
 
         main_layout = QHBoxLayout()
-        main_layout.addWidget(self.control_section, stretch=1)
-        main_layout.addWidget(self.open_gl_widget, stretch=12)
+        main_layout.addWidget(self._control_section, stretch=1)
+        main_layout.addWidget(self._open_gl_widget, stretch=12)
 
         widget = QWidget()
         widget.setLayout(main_layout)
         self.setCentralWidget(widget)
 
-        self.sensor_thread = QThread()
-        self.sensor_worker = SensorWorker(self.logger, board)
-        self.sensor_worker.moveToThread(self.sensor_thread)
+        self._sensor_thread = QThread()
+        self._sensor_worker = SensorWorker(self._logger, board)
+        self._sensor_worker.moveToThread(self._sensor_thread)
 
-        self.control_section.stream_request.connect(self.sensor_worker.stream)
-        self.sensor_worker.stream_changed.connect(
-            self.control_section.set_stream_button_text
+        self._control_section.stream_request.connect(self._sensor_worker.stream)
+        self._sensor_worker.stream_changed.connect(
+            self._control_section.set_stream_button_text
         )
 
-        self.control_section.record_request.connect(self.sensor_worker.record)
-        self.sensor_worker.record_changed.connect(
-            self.control_section.set_record_button_text
+        self._control_section.record_request.connect(self._sensor_worker.record)
+        self._sensor_worker.record_changed.connect(
+            self._control_section.set_record_button_text
         )
 
-        self.control_section.marker_request.connect(self.sensor_worker.marker)
-        self.sensor_worker.marker_changed.connect(
-            self.control_section.set_marker_button_text
+        self._control_section.marker_request.connect(self._sensor_worker.marker)
+        self._sensor_worker.marker_changed.connect(
+            self._control_section.set_marker_button_text
         )
 
-        self.control_section.reset_request.connect(self.sensor_worker.reset)
-        self.sensor_worker.reset_changed.connect(
-            self.control_section.set_reset_button_text
+        self._control_section.reset_request.connect(self._sensor_worker.reset)
+        self._sensor_worker.reset_changed.connect(
+            self._control_section.set_reset_button_text
         )
 
-        self.open_gl_widget.frame_rendered.connect(self.schedule_next_render)
+        self._open_gl_widget.frame_rendered.connect(self._schedule_next_render)
 
-        self.sensor_thread.start()
+        self._sensor_thread.start()
 
-        QTimer.singleShot(0, self.render_loop)
+        QTimer.singleShot(0, self._render_loop)
 
-    def render_loop(self) -> None:
+    def _render_loop(self) -> None:
         buffer_snapshot, is_streaming = (
-            self.sensor_worker.publish_buffer_snapshot()
+            self._sensor_worker.publish_buffer_snapshot()
         )  # buffer snapshot is read-only for GUI/Main thread
-        self.open_gl_widget.submit_snapshot(
+        self._open_gl_widget.submit_snapshot(
             raw_snapshot=buffer_snapshot, freeze_duplicate_snapshots=is_streaming
         )
 
-    def schedule_next_render(self) -> None:
-        QTimer.singleShot(0, self.render_loop)
+    def _schedule_next_render(self) -> None:
+        QTimer.singleShot(0, self._render_loop)
 
     def closeEvent(self, a0) -> None:
         QMetaObject.invokeMethod(
-            self.sensor_worker,
+            self._sensor_worker,
             "shutdown_timer",
             Qt.ConnectionType.BlockingQueuedConnection,
         )
-        self.sensor_thread.quit()
-        self.sensor_thread.wait()
-        self.logger.info("WINDOW: SensorWorker closed successfully")
-        self.open_gl_widget.release()
-        self.logger.info("WINDOW: ModernGL GPU resources released")
+        self._sensor_thread.quit()
+        self._sensor_thread.wait()
+        self._logger.info("WINDOW: SensorWorker closed successfully")
+        self._open_gl_widget.release()
+        self._logger.info("WINDOW: ModernGL GPU resources released")
         super().closeEvent(a0)
 
     @classmethod

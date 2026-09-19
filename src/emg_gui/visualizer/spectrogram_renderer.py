@@ -4,141 +4,138 @@ import moderngl
 import numpy as np
 from pyrr import Matrix44
 
-from emg_gui.config.constants import GUI_WIDTH, SPECTROGRAM_WINDOW
+from emg_gui.config.constants import SPECTROGRAM_WINDOW, TIME_WINDOW_SAMPLES
 from emg_gui.core.logger import Logger
 from emg_gui.processing.window_functions import get_hann_window
-from emg_gui.visualizer.shaders.shader_loader import (
-    spec_fragment_shader,
-    spec_vertex_shader,
-)
+from emg_gui.visualizer.shaders.shader_loader import (spec_fragment_shader,
+                                                      spec_vertex_shader)
 
 
 class SpectrogramRenderer:
 
-    COLOR_MAP = cm.get_cmap(name="inferno")
-    HANN_WINDOW = get_hann_window(window_size=SPECTROGRAM_WINDOW, skew=True)
-    HANN_WINDOW.setflags(write=False)
+    _COLOR_MAP = cm.get_cmap(name="inferno")
+    _HANN_WINDOW = get_hann_window(window_size=SPECTROGRAM_WINDOW, skew=True)
+    _HANN_WINDOW.setflags(write=False)
 
     def __init__(
         self,
         logger: Logger,
-        y: int,
-        h: int,
         number_of_emg_channels: int,
         moderngl_context: moderngl.Context,
     ) -> None:
-        self.logger = logger
+        self._logger = logger
 
         self._number_of_emg_channels = number_of_emg_channels
 
-        self.frames = np.zeros(
-            (self._number_of_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, GUI_WIDTH, 3),
+        self._frames = np.zeros(
+            (self._number_of_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, TIME_WINDOW_SAMPLES, 3),
             dtype="u1",
         )
 
-        self.prog = moderngl_context.program(
+        self._prog = moderngl_context.program(
             vertex_shader=spec_vertex_shader, fragment_shader=spec_fragment_shader
         )
 
-        vertices = []
-        for i in range(self._number_of_emg_channels):
-            y_offset = y + i * 125
-            layer = float(i)
-            vertices.extend(
-                [
-                    0,
-                    y_offset,
-                    0,
-                    1,
-                    layer,  # A
-                    0,
-                    y_offset + h,
-                    0,
-                    0,
-                    layer,  # B
-                    GUI_WIDTH,
-                    y_offset + h,
-                    1,
-                    0,
-                    layer,  # C
-                    0,
-                    y_offset,
-                    0,
-                    1,
-                    layer,  # A
-                    GUI_WIDTH,
-                    y_offset + h,
-                    1,
-                    0,
-                    layer,  # C
-                    GUI_WIDTH,
-                    y_offset,
-                    1,
-                    1,
-                    layer,  # D,
-                ]
-            )
+        values_per_vertex = 5
+        vertices_per_channel = 6
+        bytes_per_float = np.dtype("f4").itemsize
 
-        vertices = np.array(vertices, dtype="f4")
-        self.buffer = moderngl_context.buffer(vertices)
-        self.vao = moderngl_context.vertex_array(
-            self.prog, [(self.buffer, "2f 2f 1f", "in_position", "in_uv", "in_layer")]
+        self._buffer = moderngl_context.buffer(
+            reserve=(
+                self._number_of_emg_channels
+                * vertices_per_channel
+                * values_per_vertex
+                * bytes_per_float
+            ),
+            dynamic=True,
         )
 
-        self.textures = moderngl_context.texture_array(
-            size=(GUI_WIDTH, SPECTROGRAM_WINDOW // 2 + 1, self._number_of_emg_channels),
+        self._vao = moderngl_context.vertex_array(
+            self._prog, [(self._buffer, "2f 2f 1f", "in_position", "in_uv", "in_layer")]
+        )
+
+        self._textures = moderngl_context.texture_array(
+            size=(TIME_WINDOW_SAMPLES, SPECTROGRAM_WINDOW // 2 + 1, self._number_of_emg_channels),
             components=3,
-            data=self.frames,
+            data=self._frames,
         )
-        self.textures.repeat_x = False
-        self.textures.repeat_y = True
+        self._textures.repeat_x = False
+        self._textures.repeat_y = True
 
-        self.logger.info("SPEC: ModernGL GPU resources created")
+        self._logger.info("SPEC: ModernGL GPU resources created")
 
     def reset(self) -> None:
-        self.frames = np.zeros(
-            (self._number_of_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, GUI_WIDTH, 3),
+        self._frames = np.zeros(
+            (self._number_of_emg_channels, SPECTROGRAM_WINDOW // 2 + 1, TIME_WINDOW_SAMPLES, 3),
             dtype="u1",
         )
 
     def add(self, window) -> None:
-        slices = SpectrogramRenderer.stft_slice(window)
-        new_slice = SpectrogramRenderer.stft_color(slices)
-        self.frames[:, :, :-1, :] = self.frames[:, :, 1:, :]
-        self.frames[:, :, -1, :] = new_slice
+        slices = SpectrogramRenderer._stft_slice(window)
+        new_slice = SpectrogramRenderer._stft_color(slices)
+        self._frames[:, :, :-1, :] = self._frames[:, :, 1:, :]
+        self._frames[:, :, -1, :] = new_slice
 
     def size(self, w, h) -> None:
-        w = GUI_WIDTH
-        P = SpectrogramRenderer.orthographic(w, h)
-        self.prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
+        P = SpectrogramRenderer._orthographic(w, h)
+        self._prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
+        vertices = self._build_vertices(w, h)
+        self._buffer.write(vertices)
+
+    def _build_vertices(self, widget_width: int, widget_height: int) -> np.ndarray:
+        channel_height = widget_height / self._number_of_emg_channels
+
+        spectrogram_top_offset = channel_height * 0.5
+        spectrogram_height = channel_height * 0.5
+
+        vertices = []
+
+        for channel_index in range(self._number_of_emg_channels):
+            y_top = channel_index * channel_height + spectrogram_top_offset
+            y_bottom = y_top + spectrogram_height
+            layer = float(channel_index)
+
+            vertices.extend(
+                [
+                    0, y_top, 0, 1, layer,
+                    0, y_bottom, 0, 0, layer,
+                    widget_width, y_bottom, 1, 0, layer,
+
+                    0, y_top, 0, 1, layer,
+                    widget_width, y_bottom, 1, 0, layer,
+                    widget_width, y_top, 1, 1, layer,
+                ]
+            )
+
+        return np.array(vertices, dtype="f4")
 
     def draw(self) -> None:
-        self.textures.write(self.frames)
-        self.textures.use(0)
+        self._textures.write(self._frames)
+        self._textures.use(0)
         for i in range(self._number_of_emg_channels):
-            self.vao.render(mode=moderngl.TRIANGLES, vertices=6, first=i * 6)
+            self._vao.render(mode=moderngl.TRIANGLES, vertices=6, first=i * 6)
 
     def release(self) -> None:
-        self.prog.release()
-        self.buffer.release()
-        self.textures.release()
-        self.vao.release()
-        self.logger.info("SPEC: ModernGL GPU resources released")
+        self._prog.release()
+        self._buffer.release()
+        self._textures.release()
+        self._vao.release()
+        self._logger.info("SPEC: ModernGL GPU resources released")
 
     @staticmethod
-    def stft_slice(window) -> np.ndarray:
-        return np.fft.rfft(window * SpectrogramRenderer.HANN_WINDOW, axis=1)
+    def _stft_slice(window) -> np.ndarray:
+        return np.fft.rfft(window * SpectrogramRenderer._HANN_WINDOW, axis=1)
 
     @staticmethod
-    def stft_color(slices, min_db=-5, max_db=10):
+    def _stft_color(slices, min_db=-5, max_db=10):
         slices = librosa.amplitude_to_db(np.abs(slices))
         slices = slices.clip(min_db, max_db)
         slices = (slices - min_db) / (max_db - min_db)
-        slices = SpectrogramRenderer.COLOR_MAP(slices)
+        slices = SpectrogramRenderer._COLOR_MAP(slices)
         slices = (slices * 255).astype("u1")
         return slices[:, :, :3]
 
     @staticmethod
-    def orthographic(w, h) -> Matrix44:
+    def _orthographic(w, h) -> Matrix44:
         P = Matrix44.orthogonal_projection(0, w, h, 0, -1, 1, dtype="f4")
         return P

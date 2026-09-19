@@ -1,13 +1,11 @@
 import moderngl
 import numpy as np
 
-from emg_gui.config.constants import GUI_WIDTH
+from emg_gui.config.constants import TIME_WINDOW_SAMPLES
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
-from emg_gui.visualizer.shaders.shader_loader import (
-    wave_fragment_shader,
-    wave_vertex_shader,
-)
+from emg_gui.visualizer.shaders.shader_loader import (wave_fragment_shader,
+                                                      wave_vertex_shader)
 
 
 class TimeSeriesRenderer:
@@ -18,19 +16,26 @@ class TimeSeriesRenderer:
         moderngl_context: moderngl.Context,
     ) -> None:
 
-        _buffer_size = number_of_emg_channels * GUI_WIDTH * 2 * np.dtype("f4").itemsize
+        _components_per_vertex = 2
+        _bytes_per_float = np.dtype("f4").itemsize
+        _buffer_size = (
+            number_of_emg_channels
+            * TIME_WINDOW_SAMPLES
+            * _components_per_vertex
+            * _bytes_per_float
+        )
 
-        self.logger = logger
+        self._logger = logger
 
-        self.x_points = np.linspace(start=-1, stop=1, num=GUI_WIDTH)
+        self._x_points = np.linspace(start=-1, stop=1, num=TIME_WINDOW_SAMPLES, dtype="f4")
 
-        self.prog = moderngl_context.program(
+        self._prog = moderngl_context.program(
             vertex_shader=wave_vertex_shader, fragment_shader=wave_fragment_shader
         )
-        self.buffer = moderngl_context.buffer(reserve=_buffer_size, dynamic=True)
-        self.vao = moderngl_context.vertex_array(self.prog, self.buffer, "in_position")
+        self._buffer = moderngl_context.buffer(reserve=_buffer_size, dynamic=True)
+        self._vao = moderngl_context.vertex_array(self._prog, self._buffer, "in_position")
 
-        self.logger.info("TIMESERIES: ModernGL GPU resources created")
+        self._logger.info("TIMESERIES: ModernGL GPU resources created")
 
     def draw(self, raw_snapshot: EMGArray, filtered_snapshot: EMGArray) -> None:
 
@@ -50,26 +55,26 @@ class TimeSeriesRenderer:
         )
 
         y_range = y_max - y_min
-        flat_channels = y_range < 0.0000001
-        safe_range = np.where(flat_channels, 1.0, y_range)
+        flat_channel_mask = y_range < 0.0000001
+        safe_range = np.where(flat_channel_mask, 1.0, y_range)
 
-        x_vals = np.tile(A=self.x_points, reps=(channels, 1))
+        x_vals = np.tile(A=self._x_points, reps=(channels, 1))
 
         self._render_snapshot(
             raw_snapshot,
             x_vals,
-            y_max,
+            y_min,
             safe_range,
-            flat_channels,
+            flat_channel_mask,
             color=(0.55, 0.55, 0.55, 1.0),
         )
 
         self._render_snapshot(
             filtered_snapshot,
             x_vals,
-            y_max,
+            y_min,
             safe_range,
-            flat_channels,
+            flat_channel_mask,
             color=(0.1, 1.0, 0.6, 1.0),
         )
 
@@ -77,29 +82,30 @@ class TimeSeriesRenderer:
         self,
         snapshot: EMGArray,
         x_vals: np.ndarray,
-        y_max: np.ndarray,
+        y_min: np.ndarray,
         safe_range: np.ndarray,
-        flat_channels: np.ndarray,
+        flat_channel_mask: np.ndarray,
         color: tuple[float, float, float, float],
     ) -> None:
 
         channels, width = snapshot.shape
 
-        y_norm = (snapshot - y_max) * 0.05 / safe_range + 1.0
-        y_norm = np.where(flat_channels, 1.0, y_norm)
+        y_norm = (snapshot - y_min) / safe_range
+        y_norm = np.where(flat_channel_mask, 0.5, y_norm)
         positions = np.stack(arrays=[x_vals, y_norm], axis=-1).reshape(-1, 2)
-        self.buffer.write(positions.astype("f4"))
+        self._buffer.write(positions.astype("f4"))
 
-        self.prog["u_color"] = color
+        self._prog["u_color"] = color
+        self._prog["u_channel_count"] = float(channels)
 
         for channel_index in range(channels):
-            self.prog["u_channel_index"] = float(channel_index)
-            self.vao.render(
+            self._prog["u_channel_index"] = float(channel_index)
+            self._vao.render(
                 moderngl.LINE_STRIP, vertices=width, first=channel_index * width
             )
 
     def release(self) -> None:
-        self.prog.release()
-        self.buffer.release()
-        self.vao.release()
-        self.logger.info("TIMESERIES: ModernGL GPU resources released")
+        self._prog.release()
+        self._buffer.release()
+        self._vao.release()
+        self._logger.info("TIMESERIES: ModernGL GPU resources released")

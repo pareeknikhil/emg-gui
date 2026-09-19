@@ -25,7 +25,7 @@ class EMGOpenGLWidget(QOpenGLWidget):
         surface_format.setSamples(4)
         self.setFormat(surface_format)
 
-        self.logger = logger
+        self._logger = logger
         self._number_of_emg_channels = number_of_emg_channels
 
         self._reference_to_raw_snapshot = None
@@ -35,15 +35,15 @@ class EMGOpenGLWidget(QOpenGLWidget):
 
     @override
     def initializeGL(self) -> None:
-        self.modern_gl_context = moderngl.create_context(require=330)
-        self.modern_gl_context.enable(moderngl.BLEND)
-        self.time_series = TimeSeriesRenderer(
-            self.logger, self._number_of_emg_channels, self.modern_gl_context
+        self._modern_gl_context = moderngl.create_context(require=330)
+        self._modern_gl_context.enable(moderngl.BLEND)
+        self._time_series = TimeSeriesRenderer(
+            self._logger, self._number_of_emg_channels, self._modern_gl_context
         )
-        self.spectrogram = SpectrogramRenderer(
-            self.logger, 40, 80, self._number_of_emg_channels, self.modern_gl_context
+        self._spectrogram = SpectrogramRenderer(
+            self._logger, self._number_of_emg_channels, self._modern_gl_context
         )  # create spectrogram instance
-        self.logger.info("OpenGL: Created opengl resources")
+        self._logger.info("OpenGL: Created opengl resources")
 
     @override
     def paintGL(self) -> None:
@@ -53,13 +53,13 @@ class EMGOpenGLWidget(QOpenGLWidget):
         ):
             return
 
-        self.time_series.draw(
+        self._time_series.draw(
             self._reference_to_raw_snapshot, self._reference_to_filtered_snapshot
         )
-        self.spectrogram.add(
+        self._spectrogram.add(
             self._reference_to_filtered_snapshot[:, -SPECTROGRAM_WINDOW:]
         )
-        self.spectrogram.draw()
+        self._spectrogram.draw()
         self._reference_to_raw_snapshot, self._reference_to_filtered_snapshot = (
             None,
             None,
@@ -68,8 +68,8 @@ class EMGOpenGLWidget(QOpenGLWidget):
 
     @override
     def resizeGL(self, w, h) -> None:
-        self.spectrogram.size(w, h)
-        self.logger.info(f"WINDOW: Size - {w} , {h}")
+        self._spectrogram.size(w, h)
+        self._logger.info(f"WINDOW: Size - {w} , {h}")
 
     def submit_snapshot(
         self, raw_snapshot: EMGArray, freeze_duplicate_snapshots: bool
@@ -87,8 +87,8 @@ class EMGOpenGLWidget(QOpenGLWidget):
 
     def release(self) -> None:
         self.makeCurrent()
-        self.time_series.release()
-        self.spectrogram.release()
-        self.modern_gl_context.release()
-        self.logger.info("OpenGL: Released openGL context")
+        self._time_series.release()
+        self._spectrogram.release()
+        self._modern_gl_context.release()
+        self._logger.info("OpenGL: Released openGL context")
         self.doneCurrent()
