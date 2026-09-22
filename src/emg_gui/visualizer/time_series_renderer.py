@@ -5,7 +5,9 @@ from emg_gui.config.constants import TIME_WINDOW_SAMPLES
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 from emg_gui.visualizer.shaders.shader_loader import (
-    time_series_fragment_shader, time_series_vertex_shader)
+    time_series_fragment_shader,
+    time_series_vertex_shader,
+)
 
 
 class TimeSeriesRenderer:
@@ -32,7 +34,8 @@ class TimeSeriesRenderer:
         )
 
         self._prog = moderngl_context.program(
-            vertex_shader=time_series_vertex_shader, fragment_shader=time_series_fragment_shader
+            vertex_shader=time_series_vertex_shader,
+            fragment_shader=time_series_fragment_shader,
         )
         self._buffer = moderngl_context.buffer(reserve=_buffer_size, dynamic=True)
         self._vao = moderngl_context.vertex_array(
@@ -55,7 +58,9 @@ class TimeSeriesRenderer:
             raw_snapshot = raw_snapshot - raw_mean
             raw_snapshot[:, ~valid_raw_samples] = 0.0
 
-        filtered_snapshot = filtered_snapshot - filtered_snapshot.mean(axis=1, keepdims=True)
+        filtered_snapshot = filtered_snapshot - filtered_snapshot.mean(
+            axis=1, keepdims=True
+        )
 
         upper_bound = np.maximum(
             raw_snapshot.max(axis=1, keepdims=True),
