@@ -2,15 +2,12 @@ import librosa
 import matplotlib.cm as cm
 import moderngl
 import numpy as np
-from pyrr import Matrix44
 
 from emg_gui.config.constants import SPECTROGRAM_WINDOW, TIME_WINDOW_SAMPLES
 from emg_gui.core.logger import Logger
-from emg_gui.processing.window_functions import get_hann_window
-from emg_gui.visualizer.shaders.shader_loader import (
-    spec_fragment_shader,
-    spec_vertex_shader,
-)
+from emg_gui.processing.window_functions import get_hann_window, orthographic
+from emg_gui.visualizer.shaders.shader_loader import (spec_fragment_shader,
+                                                      spec_vertex_shader)
 
 
 class SpectrogramRenderer:
@@ -86,14 +83,14 @@ class SpectrogramRenderer:
             dtype="u1",
         )
 
-    def add(self, window) -> None:
+    def add(self, window: np.ndarray) -> None:
         slices = SpectrogramRenderer._stft_slice(window)
         new_slice = SpectrogramRenderer._stft_color(slices)
         self._frames[:, :, :-1, :] = self._frames[:, :, 1:, :]
         self._frames[:, :, -1, :] = new_slice
 
-    def size(self, w, h) -> None:
-        P = SpectrogramRenderer._orthographic(w, h)
+    def size(self, w: int, h: int) -> None:
+        P = orthographic(w, h)
         self._prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
         vertices = self._build_vertices(w, h)
         self._buffer.write(vertices)
@@ -173,8 +170,3 @@ class SpectrogramRenderer:
         slices = SpectrogramRenderer._COLOR_MAP(slices)
         slices = (slices * 255).astype("u1")
         return slices[:, :, :3]
-
-    @staticmethod
-    def _orthographic(w, h) -> Matrix44:
-        P = Matrix44.orthogonal_projection(0, w, h, 0, -1, 1, dtype="f4")
-        return P

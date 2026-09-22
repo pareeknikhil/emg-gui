@@ -9,10 +9,14 @@ def _load_shader_file(*paths: str) -> str:
     )
 
 
-wave_vertex_shader = _load_shader_file("wave", "vertex.glsl")
+time_series_vertex_shader = _load_shader_file("time_series", "vertex.glsl")
 
-wave_fragment_shader = _load_shader_file("wave", "fragment.glsl")
+time_series_fragment_shader = _load_shader_file("time_series", "fragment.glsl")
 
 spec_vertex_shader = _load_shader_file("spec", "vertex.glsl")
 
 spec_fragment_shader = _load_shader_file("spec", "fragment.glsl")
+
+ticks_vertex_shader = _load_shader_file("ticks", "vertex.glsl")
+
+ticks_fragment_shader = _load_shader_file("ticks", "fragment.glsl")

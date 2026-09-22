@@ -9,6 +9,7 @@ from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 from emg_gui.processing.filter import filter_data
 from emg_gui.visualizer.spectrogram_renderer import SpectrogramRenderer
+from emg_gui.visualizer.ticks_renderer import TicksRenderer
 from emg_gui.visualizer.time_series_renderer import TimeSeriesRenderer
 
 
@@ -42,7 +43,10 @@ class EMGOpenGLWidget(QOpenGLWidget):
         )
         self._spectrogram = SpectrogramRenderer(
             self._logger, self._number_of_emg_channels, self._modern_gl_context
-        )  # create spectrogram instance
+        )
+        self._major_ticks = TicksRenderer(self._logger, 15, 60, self._modern_gl_context)
+        self._minor_ticks = TicksRenderer(self._logger, 5, 6, self._modern_gl_context)
+
         self._logger.info("OpenGL: Created opengl resources")
 
     @override
@@ -59,7 +63,11 @@ class EMGOpenGLWidget(QOpenGLWidget):
         self._spectrogram.add(
             self._reference_to_filtered_snapshot[:, -SPECTROGRAM_WINDOW:]
         )
+
         self._spectrogram.draw()
+        self._major_ticks.draw()
+        self._minor_ticks.draw()
+
         self._reference_to_raw_snapshot, self._reference_to_filtered_snapshot = (
             None,
             None,
@@ -69,6 +77,8 @@ class EMGOpenGLWidget(QOpenGLWidget):
     @override
     def resizeGL(self, w, h) -> None:
         self._spectrogram.size(w, h)
+        self._major_ticks.size(w, h)
+        self._minor_ticks.size(w, h)
         self._logger.info(f"WINDOW: Size - {w} , {h}")
 
     def submit_snapshot(

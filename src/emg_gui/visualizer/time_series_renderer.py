@@ -5,9 +5,7 @@ from emg_gui.config.constants import TIME_WINDOW_SAMPLES
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 from emg_gui.visualizer.shaders.shader_loader import (
-    wave_fragment_shader,
-    wave_vertex_shader,
-)
+    time_series_fragment_shader, time_series_vertex_shader)
 
 
 class TimeSeriesRenderer:
@@ -34,7 +32,7 @@ class TimeSeriesRenderer:
         )
 
         self._prog = moderngl_context.program(
-            vertex_shader=wave_vertex_shader, fragment_shader=wave_fragment_shader
+            vertex_shader=time_series_vertex_shader, fragment_shader=time_series_fragment_shader
         )
         self._buffer = moderngl_context.buffer(reserve=_buffer_size, dynamic=True)
         self._vao = moderngl_context.vertex_array(
@@ -50,19 +48,29 @@ class TimeSeriesRenderer:
 
         channels, _ = raw_snapshot.shape
 
-        y_max = np.maximum(
+        valid_raw_samples = np.any(raw_snapshot != 0.0, axis=0)
+
+        if np.any(valid_raw_samples):
+            raw_mean = raw_snapshot[:, valid_raw_samples].mean(axis=1, keepdims=True)
+            raw_snapshot = raw_snapshot - raw_mean
+            raw_snapshot[:, ~valid_raw_samples] = 0.0
+
+        filtered_snapshot = filtered_snapshot - filtered_snapshot.mean(axis=1, keepdims=True)
+
+        upper_bound = np.maximum(
             raw_snapshot.max(axis=1, keepdims=True),
             filtered_snapshot.max(axis=1, keepdims=True),
         )
 
-        y_min = np.minimum(
+        lower_bound = np.minimum(
             raw_snapshot.min(axis=1, keepdims=True),
             filtered_snapshot.min(axis=1, keepdims=True),
         )
 
-        y_range = y_max - y_min
-        flat_channel_mask = y_range < 0.0000001
-        safe_range = np.where(flat_channel_mask, 1.0, y_range)
+        half_range = np.maximum(np.abs(upper_bound), np.abs(lower_bound))
+        flat_channel_mask = half_range < 0.0000001
+        y_min = -half_range
+        safe_range = np.where(flat_channel_mask, 1.0, 2.0 * half_range)
 
         x_vals = np.tile(A=self._x_points, reps=(channels, 1))
 

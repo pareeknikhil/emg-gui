@@ -39,7 +39,9 @@ OpenBCI board or a playback recording. The current application entry point uses
 `EMGOpenGLWidget` owns duplicate-snapshot checks, snapshot filtering, and
 ModernGL rendering. `TimeSeriesRenderer` and `SpectrogramRenderer` are connected
 to the live rendering path. Channel counts come from the selected data source,
-so synthetic and real boards can expose different numbers of EMG channels.
+so synthetic and real boards can expose different numbers of EMG channels. The
+display window is sample-based, while the rendered layout is derived from the
+OpenGL widget size and the selected EMG channel count.
 
 See the [architecture guide](docs/architecture.md) for the detailed component
 hierarchy, data flow, and thread interaction sequences.
@@ -138,10 +140,11 @@ using ModernGL and is distributed under the
 ## 7. Tech Debt
 
 1. Add ticks and x-y axis
-2. Improve the GUI toggle controls and expose their options in the left sidebar.
-3. Add setup and installation instructions to this readme.
-4. Investigate rendering latency by comparing the current behavior with the initial implementation.
-5. Add timer and countdown visualizations.
-6. Move signal processing from the GUI thread to a dedicated processing thread.
-7. Processing latency in the performance metrics.
-8. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.
+2. Add legends for raw and filtered emg in timeseries renderer
+3. Improve the GUI toggle controls and expose their options in the left sidebar.
+4. Add setup and installation instructions to this readme.
+5. Investigate rendering latency by comparing the current behavior with the initial implementation.
+6. Add timer and countdown visualizations.
+7. Move signal processing from the GUI thread to a dedicated processing thread.
+8. Processing latency in the performance metrics.
+9. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.

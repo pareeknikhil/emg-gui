@@ -44,10 +44,10 @@ visualizer package owns the OpenGL-specific implementation.
   without importing or directly calling the window, worker, or board.
 - `SensorWorker` owns the polling timer, display ring buffer, and latest complete
   EMG snapshot. Its polling and stream-control slots run on the sensor thread.
-- `EMGOpenGLWidget` owns the Qt OpenGL lifecycle, skips duplicate snapshots,
-  filters snapshot copies on the GUI thread, and submits frames to the
-  renderers.
-- `TimeSeriesRenderer` owns the wave shader program, dynamic vertex buffer, and
+- `EMGOpenGLWidget` owns the Qt OpenGL lifecycle, skips duplicate snapshots while
+  streaming, filters snapshot copies on the GUI thread, and submits frames to
+  the renderers.
+- `TimeSeriesRenderer` owns the time_series shader program, dynamic vertex buffer, and
   vertex array. It currently draws raw and filtered EMG signals.
 - `SpectrogramRenderer` owns the spectrogram shader program, texture array, and
   Hann-windowed STFT slice history. It is instantiated and drawn by
@@ -75,7 +75,7 @@ emg-gui
         │   ├── Stream control [current]
         │   ├── Recording control [current]
         │   ├── Movement marker control [current]
-        │   ├── Reset control [partial: display buffer only]
+        │   ├── Reset control [partial: ring buffer only]
         │   └── Dataset and recording-folder selection [current]
         ├── SensorThread (QThread) [current]
         │   └── SensorWorker [current]
@@ -89,7 +89,7 @@ emg-gui
             ├── TimeSeriesRenderer [current]
             │   ├── Raw-signal layer [current]
             │   ├── Filtered-signal layer [current]
-            │   └── Wave shaders and dynamic GPU buffer [current]
+            │   └── time_series shaders and dynamic GPU buffer [current]
             ├── SpectrogramRenderer [current]
             │   ├── Hann-windowed STFT preparation
             │   ├── Texture array
@@ -111,14 +111,15 @@ The acquisition and rendering stages intentionally use different orientations:
 | `DataSource.extract_emg_data()`   | `(emg_channels, new_samples)`    | EMG-only batch used by the display ring buffer                 |
 | `SensorWorker.ring_buffer`        | `(buffer_samples, emg_channels)` | DvG RingBuffer elements are one sample across all EMG channels |
 | `SensorWorker.latest_snapshot`    | `(emg_channels, buffer_samples)` | Independent, C-contiguous snapshot used by the GUI             |
-| OpenGL raw and filtered snapshots | `(emg_channels, GUI_WIDTH)`      | Edge-artifact prefix removed before rendering                  |
+| OpenGL raw and filtered snapshots | `(emg_channels, TIME_WINDOW_SAMPLES)` | Edge-artifact prefix removed before rendering              |
 
 With the current constants, `buffer_samples` is
-`GUI_WIDTH + EDGE_ARTIFACT_BUFFER`, or `1,700`, and the rendered width is
-`1,200`. The selected data source determines the EMG channel count. A Cyton board
-exposes eight EMG channels, while BrainFlow's synthetic board exposes more EMG
-channels. In both live and playback paths, the worker expects data rows to be EMG
-rows plus a final marker row. Only EMG rows enter the display ring buffer.
+`TIME_WINDOW_SAMPLES + EDGE_ARTIFACT_BUFFER`, or `1,700`, and the rendered sample
+window is `1,200`. The selected data source determines the EMG channel count. A
+Cyton board exposes eight EMG channels, while BrainFlow's synthetic board exposes
+more EMG channels. In both live and playback paths, the worker expects data rows
+to be EMG rows plus a final marker row. Only EMG rows enter the display ring
+buffer.
 
 ## Data Flow
 
@@ -152,10 +153,10 @@ flowchart LR
     subgraph gui["GUI / main thread"]
         loop["EMGVisualizerWindow.render_loop()"]
         widget["EMGOpenGLWidget.submit_snapshot()"]
-        duplicate["Skip if same snapshot object"]
+        duplicate["Skip if same snapshot object while streaming"]
         filter_copy["Create independent filtering copy"]
         crop["Filter channels and remove 500-sample prefix"]
-        wave["TimeSeriesRenderer.draw()"]
+        time_series["TimeSeriesRenderer.draw()"]
         spec["SpectrogramRenderer.add() and draw()"]
         gpu["ModernGL buffers, textures, and shaders"]
 
@@ -163,7 +164,7 @@ flowchart LR
         widget --> duplicate
         duplicate -->|"new snapshot"| filter_copy --> crop
         duplicate -->|"same snapshot"| widget
-        crop --> wave --> gpu
+        crop --> time_series --> gpu
         crop --> spec --> gpu
     end
 
@@ -179,12 +180,13 @@ flowchart LR
 the previous complete snapshot or the new complete snapshot. It does not read a
 partially copied array.
 
-The window passes the worker's snapshot as the raw input. `EMGOpenGLWidget`
-first checks whether the raw snapshot is the same object as the last submitted
-snapshot. If it is new, the widget creates one copy for in-place filtering.
-Filtering runs over the full 1,700 samples so the first 500 samples can absorb
-filter edge artifacts. Both arrays are then cropped to 1,200 samples for
-rendering.
+The window passes the worker's snapshot as the raw input and passes the current
+streaming state as the duplicate-freeze flag. While streaming, `EMGOpenGLWidget`
+skips work when the raw snapshot is the same object as the last submitted
+snapshot. When not streaming, the widget may redraw the same snapshot. For a new
+rendered frame, the widget creates one copy for in-place filtering. Filtering
+runs over the full 1,700 samples so the first 500 samples can absorb filter edge
+artifacts. Both arrays are then cropped to 1,200 samples for rendering.
 
 `TimeSeriesRenderer` normalizes raw and filtered signals using their combined
 per-channel range. It draws the raw signal in gray and then overlays the
@@ -192,6 +194,8 @@ filtered signal in green.
 
 `SpectrogramRenderer` receives the latest filtered 100-sample window, shifts its
 texture history, writes a new STFT color slice, and draws the spectrogram layer.
+The current layout splits each channel band into a time-series half and a
+spectrogram half, using the EMG channel count and the current OpenGL widget size.
 
 ## Thread Model
 
@@ -278,7 +282,7 @@ sequenceDiagram
             Window->>Worker: publish_buffer_snapshot() (direct call)
             Worker-->>Window: Reference to latest_snapshot
             Window->>GL: submit_snapshot(raw)
-            alt Same raw snapshot object
+            alt Same raw snapshot object while streaming
                 GL-->>Window: frame_rendered
             else New raw snapshot object
                 GL->>GL: Copy snapshot for filtering
@@ -295,12 +299,13 @@ sequenceDiagram
 ```
 
 If rendering is faster than sensor polling, the GUI can request the same
-published snapshot more than once. `EMGOpenGLWidget` detects this by object
-identity and skips duplicate filtering, OpenGL updates, time-series drawing, and
-spectrogram history updates. Because the next zero-delay callback is registered
-only after a real paint or duplicate skip completes, this loop does not build a
-timer backlog of unfinished renders. It is still a fast polling loop while
-waiting for new sensor data.
+published snapshot more than once. While streaming, `EMGOpenGLWidget` detects
+this by object identity and skips duplicate filtering, OpenGL updates,
+time-series drawing, and spectrogram history updates. When the stream is off,
+duplicates are allowed to redraw. Because the next zero-delay callback is
+registered only after a real paint or duplicate skip completes, this loop does
+not build a timer backlog of unfinished renders. It is still a fast polling loop
+while waiting for new sensor data.
 
 ## Shutdown Sequence
 
@@ -333,10 +338,8 @@ sequenceDiagram
 
 ## Current Limitations
 
-- Reset currently clears the sensor worker's display ring buffer, but does not
-  yet reset the spectrogram renderer history.
+- Reset currently clears the sensor worker's ring buffer, but does not yet
+  publish a fresh zero snapshot or reset the spectrogram renderer history.
 - Filtering currently runs inside `EMGOpenGLWidget` on the GUI thread. A separate
   signal processor remains a planned extraction point.
-- Playback recording and CSV writing are currently no-ops.
-- The time-series and spectrogram layout still use hardcoded per-channel spacing,
-  so board-dependent channel counts can exceed the visible layout.
+- Playback `record()` and `write_to_csv()` are currently no-ops.
