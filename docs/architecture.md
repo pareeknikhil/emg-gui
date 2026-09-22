@@ -105,13 +105,13 @@ emg-gui
 
 The acquisition and rendering stages intentionally use different orientations:
 
-| Stage                             | Shape                            | Memory purpose                                                 |
-| --------------------------------- | -------------------------------- | -------------------------------------------------------------- |
-| `DataSource.get_data()`           | `(data_rows, new_samples)`       | Channel-major batch containing EMG rows and the marker row     |
-| `DataSource.extract_emg_data()`   | `(emg_channels, new_samples)`    | EMG-only batch used by the display ring buffer                 |
-| `SensorWorker.ring_buffer`        | `(buffer_samples, emg_channels)` | DvG RingBuffer elements are one sample across all EMG channels |
-| `SensorWorker.latest_snapshot`    | `(emg_channels, buffer_samples)` | Independent, C-contiguous snapshot used by the GUI             |
-| OpenGL raw and filtered snapshots | `(emg_channels, TIME_WINDOW_SAMPLES)` | Edge-artifact prefix removed before rendering              |
+| Stage                             | Shape                                 | Memory purpose                                                 |
+| --------------------------------- | ------------------------------------- | -------------------------------------------------------------- |
+| `DataSource.get_data()`           | `(data_rows, new_samples)`            | Channel-major batch containing EMG rows and the marker row     |
+| `DataSource.extract_emg_data()`   | `(emg_channels, new_samples)`         | EMG-only batch used by the display ring buffer                 |
+| `SensorWorker.ring_buffer`        | `(buffer_samples, emg_channels)`      | DvG RingBuffer elements are one sample across all EMG channels |
+| `SensorWorker.latest_snapshot`    | `(emg_channels, buffer_samples)`      | Independent, C-contiguous snapshot used by the GUI             |
+| OpenGL raw and filtered snapshots | `(emg_channels, TIME_WINDOW_SAMPLES)` | Edge-artifact prefix removed before rendering                  |
 
 With the current constants, `buffer_samples` is
 `TIME_WINDOW_SAMPLES + EDGE_ARTIFACT_BUFFER`, or `1,700`, and the rendered sample

@@ -1,5 +1,4 @@
-from emg_gui.acquisition.data_source import (DataSource, OpenBCIBoard,
-                                             PlaybackRecording)
+from emg_gui.acquisition.data_source import DataSource, PlaybackRecording
 from emg_gui.core.logger import ConsoleLogger, Logger
 from emg_gui.ui.window import EMGVisualizerWindow
 
