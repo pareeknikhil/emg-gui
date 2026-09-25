@@ -4,10 +4,15 @@ from PyQt5.QtGui import QSurfaceFormat
 from PyQt5.QtWidgets import QOpenGLWidget
 from typing_extensions import override
 
-from emg_gui.config.constants import (EDGE_ARTIFACT_BUFFER, MAJOR_PIXEL_TICKS,
-                                      MINOR_PIXEL_TICKS, SPECTROGRAM_WINDOW,
-                                      TEXT_FONT_SIZE, TEXT_PIXEL_TICKS,
-                                      TIME_WINDOW_SAMPLES)
+from emg_gui.config.constants import (
+    EDGE_ARTIFACT_BUFFER,
+    MAJOR_PIXEL_TICKS,
+    MINOR_PIXEL_TICKS,
+    SPECTROGRAM_WINDOW,
+    TEXT_FONT_SIZE,
+    TEXT_PIXEL_TICKS,
+    TIME_WINDOW_SAMPLES,
+)
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 from emg_gui.processing.filter import filter_data
@@ -21,7 +26,9 @@ class EMGOpenGLWidget(QOpenGLWidget):
 
     frame_rendered = pyqtSignal()
 
-    def __init__(self, logger: Logger, number_of_emg_channels: int, sampling_rate: int) -> None:
+    def __init__(
+        self, logger: Logger, number_of_emg_channels: int, sampling_rate: int
+    ) -> None:
         super().__init__()
 
         surface_format = QSurfaceFormat()
@@ -50,10 +57,22 @@ class EMGOpenGLWidget(QOpenGLWidget):
         self._spectrogram = SpectrogramRenderer(
             self._logger, self._number_of_emg_channels, self._modern_gl_context
         )
-        self._major_ticks = TicksRenderer(self._logger, self._window_duration_sec,MAJOR_PIXEL_TICKS, self._modern_gl_context)
-        self._minor_ticks = TicksRenderer(self._logger, self._window_duration_sec * 10,MINOR_PIXEL_TICKS, self._modern_gl_context)
+        self._major_ticks = TicksRenderer(
+            self._logger,
+            self._window_duration_sec,
+            MAJOR_PIXEL_TICKS,
+            self._modern_gl_context,
+        )
+        self._minor_ticks = TicksRenderer(
+            self._logger,
+            self._window_duration_sec * 10,
+            MINOR_PIXEL_TICKS,
+            self._modern_gl_context,
+        )
 
-        self._text = TextRenderer(self._logger, self._window_duration_sec, self._modern_gl_context)
+        self._text = TextRenderer(
+            self._logger, self._window_duration_sec, self._modern_gl_context
+        )
 
         self._logger.info("OpenGL: Created opengl resources")
 
@@ -85,10 +104,10 @@ class EMGOpenGLWidget(QOpenGLWidget):
 
     @override
     def resizeGL(self, w, h) -> None:
-        self._time_series.size(w, h, 0, MAJOR_PIXEL_TICKS+TEXT_PIXEL_TICKS)
-        self._spectrogram.size(w, h, 0, MAJOR_PIXEL_TICKS+TEXT_PIXEL_TICKS)
-        self._major_ticks.size(w, h, 0, MAJOR_PIXEL_TICKS+TEXT_PIXEL_TICKS)
-        self._minor_ticks.size(w, h, 0, MAJOR_PIXEL_TICKS+TEXT_PIXEL_TICKS)
+        self._time_series.size(w, h, 0, MAJOR_PIXEL_TICKS + TEXT_PIXEL_TICKS)
+        self._spectrogram.size(w, h, 0, MAJOR_PIXEL_TICKS + TEXT_PIXEL_TICKS)
+        self._major_ticks.size(w, h, 0, MAJOR_PIXEL_TICKS + TEXT_PIXEL_TICKS)
+        self._minor_ticks.size(w, h, 0, MAJOR_PIXEL_TICKS + TEXT_PIXEL_TICKS)
         self._text.size(w, h, 0, (TEXT_PIXEL_TICKS - TEXT_FONT_SIZE) / 2)
         self._logger.info(f"WINDOW: Size - {w} , {h}")
 

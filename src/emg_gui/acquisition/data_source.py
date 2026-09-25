@@ -7,10 +7,13 @@ from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 
 from emg_gui.acquisition.dataset_files import get_all_files
-from emg_gui.config.constants import (IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY,
-                                      MARKER_START_ACTIVITY,
-                                      SENSOR_POLL_INTERVAL_MS,
-                                      SERIAL_PORT_LINUX)
+from emg_gui.config.constants import (
+    IS_SYNTHETIC_BOARD,
+    MARKER_END_ACTIVITY,
+    MARKER_START_ACTIVITY,
+    SENSOR_POLL_INTERVAL_MS,
+    SERIAL_PORT_LINUX,
+)
 from emg_gui.core.enums import ActivityState, RecordingState, StreamingState
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
@@ -293,7 +296,9 @@ class PlaybackRecording:
         self._activity_state = ActivityState.INACTIVE
 
     def get_data(self) -> EMGArray:
-        expected_sample_count = round(self.sampling_rate * SENSOR_POLL_INTERVAL_MS / 1000)  # playback speed
+        expected_sample_count = round(
+            self.sampling_rate * SENSOR_POLL_INTERVAL_MS / 1000
+        )  # playback speed
 
         end_idx = min(self._current_idx + expected_sample_count, self._max_idx)
         board_data = self._data[:, self._current_idx : end_idx]

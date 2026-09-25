@@ -5,8 +5,10 @@ import numpy as np
 
 from emg_gui.core.logger import Logger
 from emg_gui.processing.window_functions import orthographic
-from emg_gui.visualizer.shaders.shader_loader import (ticks_fragment_shader,
-                                                      ticks_vertex_shader)
+from emg_gui.visualizer.shaders.shader_loader import (
+    ticks_fragment_shader,
+    ticks_vertex_shader,
+)
 
 
 class TicksRenderer:
@@ -32,8 +34,7 @@ class TicksRenderer:
 
         self._logger.info("TICKS: ModernGL GPU resources created")
 
-
-    def size(self, w: int, h: int, w_offset: int, h_offset:int) -> None:
+    def size(self, w: int, h: int, w_offset: int, h_offset: int) -> None:
         P = orthographic(w, h)
         self._prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
 
@@ -44,7 +45,9 @@ class TicksRenderer:
             self._prog, self._buffer, "vertex"
         )
 
-    def _build_vertices(self, widget_width: int, widget_height: int, w_offset: int, h_offset:int) -> np.ndarray:
+    def _build_vertices(
+        self, widget_width: int, widget_height: int, w_offset: int, h_offset: int
+    ) -> np.ndarray:
         plot_width = widget_width - w_offset
         tick_gap = plot_width / self._tick_intervals_per_window
         n = int(plot_width // tick_gap) + 1
@@ -72,4 +75,3 @@ class TicksRenderer:
         self._buffer.release()
         self._vao.release()
         self._logger.info("TICKS: ModernGL GPU resources released")
-

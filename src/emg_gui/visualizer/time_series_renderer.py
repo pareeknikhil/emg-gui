@@ -6,7 +6,9 @@ from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 from emg_gui.processing.window_functions import orthographic
 from emg_gui.visualizer.shaders.shader_loader import (
-    time_series_fragment_shader, time_series_vertex_shader)
+    time_series_fragment_shader,
+    time_series_vertex_shader,
+)
 
 
 class TimeSeriesRenderer:
@@ -120,7 +122,9 @@ class TimeSeriesRenderer:
         for channel_index in range(channels):
             channel_top = channel_index * channel_height
             time_series_bottom = channel_top + time_series_height
-            y_vals[channel_index] = time_series_bottom - y_norm[channel_index] * time_series_height
+            y_vals[channel_index] = (
+                time_series_bottom - y_norm[channel_index] * time_series_height
+            )
 
         positions = np.stack(arrays=[x_vals, y_vals], axis=-1).reshape(-1, 2)
 
