@@ -8,17 +8,15 @@ import numpy as np
 from emg_gui.config.constants import TEXT_FONT_SIZE, TEXT_SCALE
 from emg_gui.core.logger import Logger
 from emg_gui.processing.window_functions import orthographic
-from emg_gui.visualizer.shaders.shader_loader import (
-    text_fragment_shader,
-    text_vertex_shader,
-)
+from emg_gui.visualizer.shaders.shader_loader import (text_fragment_shader,
+                                                      text_vertex_shader)
 
 
 class CharacterSlot:
 
     def __init__(self, ctx, glyph):
         if not isinstance(glyph, freetype.GlyphSlot):
-            raise RuntimeError("Unknown glyph type")
+            raise RuntimeError("TEXT: Unknown glyph type")
 
         self.width = glyph.bitmap.width
         self.height = glyph.bitmap.rows
@@ -58,7 +56,7 @@ class TextRenderer:
         _font_path = Path("src/emg_gui/config/Roboto-Black.ttf")
         self.init_font(_font_path.as_posix(), moderngl_context)
 
-        self.texts = []
+        self.texts: list[tuple[str, float, float, str]] = []
 
         self._logger.info("TEXT: ModernGL GPU resources created")
 

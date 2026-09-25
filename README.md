@@ -148,7 +148,7 @@ distributed under the
 
 ## 7. Tech Debt
 
-1. Add ticks and x-y axis
+1. Add Y axis offset and channel indicators
 2. Add legends for raw and filtered emg in timeseries renderer
 3. Change License (currently private)
 4. Hardcoded os - serial port dependency (SERIAL_PORT_LINUX)
