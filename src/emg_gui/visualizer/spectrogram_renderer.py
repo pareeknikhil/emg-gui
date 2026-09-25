@@ -6,10 +6,8 @@ import numpy as np
 from emg_gui.config.constants import SPECTROGRAM_WINDOW, TIME_WINDOW_SAMPLES
 from emg_gui.core.logger import Logger
 from emg_gui.processing.window_functions import get_hann_window, orthographic
-from emg_gui.visualizer.shaders.shader_loader import (
-    spec_fragment_shader,
-    spec_vertex_shader,
-)
+from emg_gui.visualizer.shaders.shader_loader import (spec_fragment_shader,
+                                                      spec_vertex_shader)
 
 
 class SpectrogramRenderer:
@@ -91,10 +89,10 @@ class SpectrogramRenderer:
         self._frames[:, :, :-1, :] = self._frames[:, :, 1:, :]
         self._frames[:, :, -1, :] = new_slice
 
-    def size(self, w: int, h: int) -> None:
+    def size(self, w: int, h: int, w_offset: int, h_offset: int) -> None:
         P = orthographic(w, h)
         self._prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
-        vertices = self._build_vertices(w, h)
+        vertices = self._build_vertices(w - w_offset, h - h_offset)
         self._buffer.write(vertices)
 
     def _build_vertices(self, widget_width: int, widget_height: int) -> np.ndarray:

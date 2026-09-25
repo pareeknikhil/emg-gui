@@ -135,16 +135,27 @@ referenced project demonstrates real-time audio spectrogram visualization
 using ModernGL and is distributed under the
 [MIT License](https://github.com/nickcercone/spectrogram/blob/main/LICENCE).
 
+### 6.3 Text Rendering
+
+This project adapts the code in
+[How to render text with PyOpenGL?](https://stackoverflow.com/questions/63836707/how-to-render-text-with-pyopengl)
+by exiled (question) and Rabbid76 (answer) for its ModernGL text renderer.
+The referenced contributions demonstrate text rendering with PyOpenGL and are
+distributed under the
+[CC BY-SA 4.0 License](https://creativecommons.org/licenses/by-sa/4.0/).
+
 ---
 
 ## 7. Tech Debt
 
 1. Add ticks and x-y axis
 2. Add legends for raw and filtered emg in timeseries renderer
-3. Improve the GUI toggle controls and expose their options in the left sidebar.
-4. Add setup and installation instructions to this readme.
-5. Investigate rendering latency by comparing the current behavior with the initial implementation.
-6. Add timer and countdown visualizations.
-7. Move signal processing from the GUI thread to a dedicated processing thread.
-8. Processing latency in the performance metrics.
-9. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.
+3. Change License (currently private)
+4. Hardcoded os - serial port dependency (SERIAL_PORT_LINUX)
+5. Improve the GUI toggle controls and expose their options in the left sidebar.
+6. Add setup and installation instructions to this readme.
+7. Investigate rendering latency by comparing the current behavior with the initial implementation.
+8. Add timer and countdown visualizations.
+9. Move signal processing from the GUI thread to a dedicated processing thread.
+10. Processing latency in the performance metrics.
+11. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.

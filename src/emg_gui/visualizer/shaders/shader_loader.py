@@ -20,3 +20,7 @@ spec_fragment_shader = _load_shader_file("spec", "fragment.glsl")
 ticks_vertex_shader = _load_shader_file("ticks", "vertex.glsl")
 
 ticks_fragment_shader = _load_shader_file("ticks", "fragment.glsl")
+
+text_vertex_shader = _load_shader_file("text", "vertex.glsl")
+
+text_fragment_shader = _load_shader_file("text", "fragment.glsl")

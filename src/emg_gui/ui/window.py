@@ -20,7 +20,7 @@ class EMGVisualizerWindow(QMainWindow):
 
         self._control_section = EMGControlPanel()
 
-        self._open_gl_widget = EMGOpenGLWidget(self._logger, board.emg_channel_count)
+        self._open_gl_widget = EMGOpenGLWidget(self._logger, board.emg_channel_count, board.sampling_rate)
 
         main_layout = QHBoxLayout()
         main_layout.addWidget(self._control_section, stretch=1)

@@ -7,12 +7,10 @@ from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 
 from emg_gui.acquisition.dataset_files import get_all_files
-from emg_gui.config.constants import (
-    IS_SYNTHETIC_BOARD,
-    MARKER_END_ACTIVITY,
-    MARKER_START_ACTIVITY,
-    SERIAL_PORT_LINUX,
-)
+from emg_gui.config.constants import (IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY,
+                                      MARKER_START_ACTIVITY,
+                                      SENSOR_POLL_INTERVAL_MS,
+                                      SERIAL_PORT_LINUX)
 from emg_gui.core.enums import ActivityState, RecordingState, StreamingState
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
@@ -53,6 +51,9 @@ class DataSource(Protocol):
 
     @property
     def is_active(self) -> bool: ...
+
+    @property
+    def sampling_rate(self) -> int: ...
 
 
 class OpenBCIBoard:
@@ -196,6 +197,10 @@ class OpenBCIBoard:
             self._board.release_session()
 
     @property
+    def sampling_rate(self) -> int:
+        return self._board.get_sampling_rate(self._BOARD_ID)
+
+    @property
     def is_streaming(self) -> bool:
         return self._streaming_state is StreamingState.STREAMING
 
@@ -288,14 +293,14 @@ class PlaybackRecording:
         self._activity_state = ActivityState.INACTIVE
 
     def get_data(self) -> EMGArray:
-        num_of_samples_expctd = 10  # playback speed
+        expected_sample_count = round(self.sampling_rate * SENSOR_POLL_INTERVAL_MS / 1000)  # playback speed
 
-        end_idx = min(self._current_idx + num_of_samples_expctd, self._max_idx)
+        end_idx = min(self._current_idx + expected_sample_count, self._max_idx)
         board_data = self._data[:, self._current_idx : end_idx]
         self._current_idx = end_idx
 
         return self._add_padding(
-            board_data, len(self._data_channels), num_of_samples_expctd
+            board_data, len(self._data_channels), expected_sample_count
         )
 
     def extract_emg_data(self, emg_with_marker_data: EMGArray) -> EMGArray:
@@ -328,6 +333,10 @@ class PlaybackRecording:
 
     def release(self) -> None:
         return None
+
+    @property
+    def sampling_rate(self) -> int:
+        return 250  # assumes cyton board
 
     @property
     def emg_channel_count(self) -> int:

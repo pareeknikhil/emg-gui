@@ -17,6 +17,7 @@ dependencies = [
     "cycler (==0.12.1)",
     "decorator (==5.3.1)",
     "fonttools (==4.60.2)",
+    "freetype-py==2.5.1",
     "glcontext (==3.0.0)",
     "idna (==3.18)",
     "importlib-resources (==6.5.2)",
