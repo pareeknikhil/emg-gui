@@ -4,9 +4,14 @@ from PyQt5.QtGui import QSurfaceFormat
 from PyQt5.QtWidgets import QOpenGLWidget
 from typing_extensions import override
 
-from emg_gui.config.constants import (EDGE_ARTIFACT_BUFFER, MAJOR_PIXEL_TICKS,
-                                      MINOR_PIXEL_TICKS, SPECTROGRAM_WINDOW,
-                                      TEXT_PIXEL_TICKS, TIME_WINDOW_SAMPLES)
+from emg_gui.config.constants import (
+    EDGE_ARTIFACT_BUFFER,
+    MAJOR_PIXEL_TICKS,
+    MINOR_PIXEL_TICKS,
+    SPECTROGRAM_WINDOW,
+    TEXT_PIXEL_TICKS,
+    TIME_WINDOW_SAMPLES,
+)
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 from emg_gui.processing.filter import filter_data
@@ -65,7 +70,10 @@ class EMGOpenGLWidget(QOpenGLWidget):
         )
 
         self._text = TextRenderer(
-            self._logger, self._window_duration_sec, self._number_of_emg_channels, self._modern_gl_context
+            self._logger,
+            self._window_duration_sec,
+            self._number_of_emg_channels,
+            self._modern_gl_context,
         )
 
         self._logger.info("OpenGL: Created opengl resources")

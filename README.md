@@ -166,8 +166,8 @@ distributed under the
 ## 7. Tech Debt
 
 1. Add setup and installation instructions to this readme.
-2. Create new repo-emg-ability
-3. Add legends for raw and filtered emg in timeseries renderer
+2. Create new repo-emg-ability (create import and remove run.sh).
+3. Add legends for raw and filtered emg in timeseries renderer.
 4. Processing latency in the performance metrics.
 5. Improve the GUI toggle controls and expose their options in the left sidebar.
 6. Add timer and countdown visualizations.
