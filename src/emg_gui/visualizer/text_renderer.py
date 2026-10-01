@@ -5,13 +5,12 @@ import freetype
 import moderngl
 import numpy as np
 
-from emg_gui.config.constants import TEXT_FONT_SIZE, TEXT_SCALE
+from emg_gui.config.constants import (TEXT_FONT_SIZE, TEXT_PIXEL_TICKS,
+                                      TEXT_SCALE)
 from emg_gui.core.logger import Logger
 from emg_gui.processing.window_functions import orthographic
-from emg_gui.visualizer.shaders.shader_loader import (
-    text_fragment_shader,
-    text_vertex_shader,
-)
+from emg_gui.visualizer.shaders.shader_loader import (text_fragment_shader,
+                                                      text_vertex_shader)
 
 
 class CharacterSlot:
@@ -27,9 +26,10 @@ class CharacterSlot:
         size = (self.width, self.height)
 
         data = np.array(glyph.bitmap.buffer, dtype="u1")
-        self.texture = ctx.texture(size, 1, data)
-        self.texture.repeat_x = False
-        self.texture.repeat_y = False
+        self.texture = ctx.texture(size, 1, data) if self.width and self.height else None
+        if self.texture is not None:
+            self.texture.repeat_x = False
+            self.texture.repeat_y = False
 
 
 class TextRenderer:
@@ -38,10 +38,12 @@ class TextRenderer:
         self,
         logger: Logger,
         window_duration_sec: float,
+        number_of_emg_channels: int,
         moderngl_context: moderngl.Context,
     ) -> None:
         self._logger = logger
         self._window_duration_sec = window_duration_sec
+        self._number_of_emg_channels = number_of_emg_channels
 
         self._prog = moderngl_context.program(
             vertex_shader=text_vertex_shader, fragment_shader=text_fragment_shader
@@ -68,7 +70,7 @@ class TextRenderer:
         face = freetype.Face(font)
         face.set_pixel_sizes(size, size)
 
-        for char in "0123456789s":
+        for char in dict.fromkeys("0123456789sChannel "):
             face.load_char(char)
             character = CharacterSlot(moderngl_context, face.glyph)
             self.characters[char] = character
@@ -119,10 +121,10 @@ class TextRenderer:
         P = orthographic(w, h)
         self._prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
 
-        tick_gap = (w - w_offset) / self._window_duration_sec
-        y = h - h_offset
-
         self.texts.clear()
+
+        tick_gap = (w - w_offset) / self._window_duration_sec
+        y = h - (TEXT_PIXEL_TICKS - TEXT_FONT_SIZE) / 2
 
         for i in range(1, int(self._window_duration_sec) + 1):
             label = f"{i}s"
@@ -130,6 +132,13 @@ class TextRenderer:
             x = w - i * tick_gap
             x = max(w_offset + half_width, min(x, w - half_width))
             self.add(label, x, y, align="center")
+
+        channel_height = (h - h_offset) / self._number_of_emg_channels
+        for channel_index in range(self._number_of_emg_channels):
+            y = (channel_index + 0.5) * channel_height + TEXT_FONT_SIZE / 2
+            self.add(
+                f"Channel {channel_index + 1}", w_offset / 2, y, align="center"
+            )
 
     def draw(self) -> None:
         for text, x, y, align in self.texts:
@@ -139,18 +148,18 @@ class TextRenderer:
             if align == "right":
                 w = self.text_width(text)
                 x -= w
-            for i, c in enumerate(text):
+            for c in text:
                 character = self.characters[c]
-                character.texture.use(0)
-                w = character.width
-                h = character.height
-                self.set_geometry(x, y, w / TEXT_SCALE, h / TEXT_SCALE)
-                self._vao.render()
-                x = x + (character.advance >> 6) / TEXT_SCALE
+                if character.texture is not None:
+                    character.texture.use(0)
+                    self.set_geometry(x, y, character.width / TEXT_SCALE, character.height / TEXT_SCALE)
+                    self._vao.render()
+                x += (character.advance >> 6) / TEXT_SCALE
 
     def release(self) -> None:
         for character in self.characters.values():
-            character.texture.release()
+            if character.texture is not None:
+                character.texture.release()
         self._prog.release()
         self._buffer.release()
         self._vao.release()

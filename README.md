@@ -165,12 +165,11 @@ distributed under the
 
 ## 7. Tech Debt
 
-1. Add Y axis offset and channel indicators
-2. Add setup and installation instructions to this readme.
-3. Create new repo-emg-ability
-4. Add legends for raw and filtered emg in timeseries renderer
-5. Processing latency in the performance metrics.
-6. Improve the GUI toggle controls and expose their options in the left sidebar.
-7. Add timer and countdown visualizations.
-8. Move signal processing from the GUI thread to a dedicated processing thread.
-9. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.
+1. Add setup and installation instructions to this readme.
+2. Create new repo-emg-ability
+3. Add legends for raw and filtered emg in timeseries renderer
+4. Processing latency in the performance metrics.
+5. Improve the GUI toggle controls and expose their options in the left sidebar.
+6. Add timer and countdown visualizations.
+7. Move signal processing from the GUI thread to a dedicated processing thread.
+8. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.
