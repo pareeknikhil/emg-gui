@@ -1,3 +1,4 @@
+import platform
 import sys
 import time
 from typing import Protocol
@@ -5,15 +6,12 @@ from typing import Protocol
 import numpy as np
 from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
+from serial.tools import list_ports
 
 from emg_gui.acquisition.dataset_files import get_all_files
-from emg_gui.config.constants import (
-    IS_SYNTHETIC_BOARD,
-    MARKER_END_ACTIVITY,
-    MARKER_START_ACTIVITY,
-    SENSOR_POLL_INTERVAL_MS,
-    SERIAL_PORT_LINUX,
-)
+from emg_gui.config.constants import (IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY,
+                                      MARKER_START_ACTIVITY,
+                                      SENSOR_POLL_INTERVAL_MS)
 from emg_gui.core.enums import ActivityState, RecordingState, StreamingState
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
@@ -62,14 +60,37 @@ class DataSource(Protocol):
 class OpenBCIBoard:
     _BOARD_ID = BoardIds.SYNTHETIC_BOARD if IS_SYNTHETIC_BOARD else BoardIds.CYTON_BOARD
 
+    _PORT_NAMES = ("FT231X USB UART", "VCP")
+
     _instance = None
+
+    @classmethod
+    def _get_serial_port(cls) -> str:
+        ports = []
+
+        for port in list_ports.comports():
+            description = port.description or ""
+
+            if description.startswith(cls._PORT_NAMES):
+                if platform.system() == "Darwin" and port.device.startswith("/dev/tty"):
+                    continue
+
+                ports.append(port.device)
+
+        if not ports:
+            raise RuntimeError("DATASOURCE: No OpenBCI Cyton dongle found")
+
+        return ports[0]
 
     def __init__(self, logger: Logger) -> None:
         BoardShim.enable_dev_board_logger()
         self._logger = logger
 
         _params = BrainFlowInputParams()
-        _params.serial_port = SERIAL_PORT_LINUX
+
+        if not IS_SYNTHETIC_BOARD:
+            _params.serial_port = self._get_serial_port()
+            self._logger.info(f"DATASOURCE: Port - {_params.serial_port}")
 
         self._brainflow_emg_channels = BoardShim.get_emg_channels(
             board_id=self._BOARD_ID

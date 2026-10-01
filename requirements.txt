@@ -35,6 +35,7 @@ PyQt5==5.15.11
 PyQt5-Qt5==5.15.19
 PyQt5_sip==12.17.1
 pyrr==0.10.3
+pyserial==3.5
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 requests==2.32.5
