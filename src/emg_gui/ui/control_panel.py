@@ -14,71 +14,71 @@ class EMGControlPanel(QGroupBox):
 
     def __init__(self) -> None:
         super().__init__()
-        self.control_layout = QVBoxLayout()
+        self._control_layout = QVBoxLayout()
 
-        self.folders = QComboBox()
+        self._folders = QComboBox()
 
-        self.datasplit = QComboBox()
+        self._datasplit = QComboBox()
 
-        self.add_widgets()
+        self._add_widgets()
 
-    def add_widgets(self):
-        self.datasplit.addItems(data_split.value for data_split in DatasetSplit)
-        self.datasplit.setCurrentIndex(-1)
-        self.datasplit.currentTextChanged.connect(self.update_dir_list_dropdown)
+    def _add_widgets(self):
+        self._datasplit.addItems(data_split.value for data_split in DatasetSplit)
+        self._datasplit.setCurrentIndex(-1)
+        self._datasplit.currentTextChanged.connect(self._update_dir_list_dropdown)
 
-        self.stream_button = QPushButton("Stream Data")
-        self.stream_button.clicked.connect(lambda: self.stream_request.emit())
+        self._stream_button = QPushButton("Stream Data")
+        self._stream_button.clicked.connect(lambda: self.stream_request.emit())
 
-        self.record_button = QPushButton("Record")
-        self.record_button.clicked.connect(
+        self._record_button = QPushButton("Record")
+        self._record_button.clicked.connect(
             lambda: self.record_request.emit(
                 self.selected_datasplit, self.selected_folder
             )
         )
 
-        self.marker_button = QPushButton("Start Movement")
-        self.marker_button.clicked.connect(lambda: self.marker_request.emit())
+        self._marker_button = QPushButton("Start Movement")
+        self._marker_button.clicked.connect(lambda: self.marker_request.emit())
 
-        self.reset_button = QPushButton("Reset")
-        self.reset_button.clicked.connect(lambda: self.reset_request.emit())
+        self._reset_button = QPushButton("Reset")
+        self._reset_button.clicked.connect(lambda: self.reset_request.emit())
 
-        self.control_layout.addWidget(self.datasplit)
-        self.control_layout.addWidget(self.folders)
-        self.control_layout.addWidget(self.stream_button)
-        self.control_layout.addWidget(self.record_button)
-        self.control_layout.addWidget(self.marker_button)
-        self.control_layout.addWidget(self.reset_button)
+        self._control_layout.addWidget(self._datasplit)
+        self._control_layout.addWidget(self._folders)
+        self._control_layout.addWidget(self._stream_button)
+        self._control_layout.addWidget(self._record_button)
+        self._control_layout.addWidget(self._marker_button)
+        self._control_layout.addWidget(self._reset_button)
 
-        self.setLayout(self.control_layout)
+        self.setLayout(self._control_layout)
 
     @property
     def selected_datasplit(self) -> str:
-        return self.datasplit.currentText()
+        return self._datasplit.currentText()
 
     @property
     def selected_folder(self) -> str:
-        return self.folders.currentText()
+        return self._folders.currentText()
 
     @pyqtSlot(str)
     def set_stream_button_text(self, text: str) -> None:
-        self.stream_button.setText(text)
+        self._stream_button.setText(text)
 
     @pyqtSlot(str)
     def set_record_button_text(self, text: str) -> None:
-        self.record_button.setText(text)
+        self._record_button.setText(text)
 
     @pyqtSlot(str)
     def set_marker_button_text(self, text: str) -> None:
-        self.marker_button.setText(text)
+        self._marker_button.setText(text)
 
     @pyqtSlot(str)
     def set_reset_button_text(self, text: str) -> None:
-        self.reset_button.setText(text)
+        self._reset_button.setText(text)
 
-    def update_dir_list_dropdown(self, selected_datasplit) -> None:
-        self.folders.blockSignals(True)
-        self.folders.clear()
-        self.folders.addItems(get_all_labels(selected_datasplit))
-        self.folders.setCurrentIndex(-1)
-        self.folders.blockSignals(False)
+    def _update_dir_list_dropdown(self, selected_datasplit) -> None:
+        self._folders.blockSignals(True)
+        self._folders.clear()
+        self._folders.addItems(get_all_labels(selected_datasplit))
+        self._folders.setCurrentIndex(-1)
+        self._folders.blockSignals(False)

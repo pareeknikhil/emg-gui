@@ -1,3 +1,4 @@
+import platform
 import sys
 import time
 from typing import Protocol
@@ -5,13 +6,14 @@ from typing import Protocol
 import numpy as np
 from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
+from serial.tools import list_ports
 
 from emg_gui.acquisition.dataset_files import get_all_files
 from emg_gui.config.constants import (
     IS_SYNTHETIC_BOARD,
     MARKER_END_ACTIVITY,
     MARKER_START_ACTIVITY,
-    SERIAL_PORT_LINUX,
+    SENSOR_POLL_INTERVAL_MS,
 )
 from emg_gui.core.enums import ActivityState, RecordingState, StreamingState
 from emg_gui.core.logger import Logger
@@ -54,26 +56,54 @@ class DataSource(Protocol):
     @property
     def is_active(self) -> bool: ...
 
+    @property
+    def sampling_rate(self) -> int: ...
+
 
 class OpenBCIBoard:
-    BOARDID = BoardIds.SYNTHETIC_BOARD if IS_SYNTHETIC_BOARD else BoardIds.CYTON_BOARD
+    _BOARD_ID = BoardIds.SYNTHETIC_BOARD if IS_SYNTHETIC_BOARD else BoardIds.CYTON_BOARD
 
-    __instance = None
+    _PORT_NAMES = ("FT231X USB UART", "VCP")
+
+    _instance = None
+
+    @classmethod
+    def _get_serial_port(cls) -> str:
+        ports = []
+
+        for port in list_ports.comports():
+            description = port.description or ""
+
+            if description.startswith(cls._PORT_NAMES):
+                if platform.system() == "Darwin" and port.device.startswith("/dev/tty"):
+                    continue
+
+                ports.append(port.device)
+
+        if not ports:
+            raise RuntimeError("DATASOURCE: No OpenBCI Cyton dongle found")
+
+        return ports[0]
 
     def __init__(self, logger: Logger) -> None:
         BoardShim.enable_dev_board_logger()
         self._logger = logger
 
         _params = BrainFlowInputParams()
-        _params.serial_port = SERIAL_PORT_LINUX
 
-        self._brainflow_emg_channels = BoardShim.get_emg_channels(board_id=self.BOARDID)
-        brainflow_marker_channel = BoardShim.get_marker_channel(board_id=self.BOARDID)
+        if not IS_SYNTHETIC_BOARD:
+            _params.serial_port = self._get_serial_port()
+            self._logger.info(f"DATASOURCE: Port - {_params.serial_port}")
+
+        self._brainflow_emg_channels = BoardShim.get_emg_channels(
+            board_id=self._BOARD_ID
+        )
+        brainflow_marker_channel = BoardShim.get_marker_channel(board_id=self._BOARD_ID)
 
         self._data_channels = self._brainflow_emg_channels + [brainflow_marker_channel]
         self._emg_channel_count = len(self._brainflow_emg_channels)
 
-        self._board = BoardShim(board_id=self.BOARDID, input_params=_params)
+        self._board = BoardShim(board_id=self._BOARD_ID, input_params=_params)
         self._board.prepare_session()
         if not self._board.is_prepared():
             self._logger.error("DATASOURCE: Board cannot be initialized")
@@ -90,9 +120,9 @@ class OpenBCIBoard:
 
     @classmethod
     def get_instance(cls, logger: Logger) -> DataSource:
-        if cls.__instance is None:
-            cls.__instance = cls(logger)
-        return cls.__instance
+        if cls._instance is None:
+            cls._instance = cls(logger)
+        return cls._instance
 
     @property
     def emg_channel_count(self) -> int:
@@ -194,6 +224,10 @@ class OpenBCIBoard:
             self._board.release_session()
 
     @property
+    def sampling_rate(self) -> int:
+        return self._board.get_sampling_rate(self._BOARD_ID)
+
+    @property
     def is_streaming(self) -> bool:
         return self._streaming_state is StreamingState.STREAMING
 
@@ -213,17 +247,17 @@ class OpenBCIBoard:
 
 
 class PlaybackRecording:
-    __instance = None
+    _instance = None
 
     def __init__(self, logger: Logger, file_path: str) -> None:
         self._logger = logger
         self._file_path = file_path
 
-        self.data = np.loadtxt(self._file_path, delimiter="\t").T
-        self.current_idx = 0
-        self.max_idx = self.data.shape[1]
+        self._data = np.loadtxt(self._file_path, delimiter="\t").T
+        self._current_idx = 0
+        self._max_idx = self._data.shape[1]
 
-        self._data_channels = list(range(self.data.shape[0]))
+        self._data_channels = list(range(self._data.shape[0]))
         self._emg_channel_count = len(self._data_channels) - 1  # assumes marker is last
 
         self._logger.info(
@@ -238,16 +272,16 @@ class PlaybackRecording:
 
     @classmethod
     def get_instance(cls, logger: Logger, file_path: str) -> DataSource:
-        if cls.__instance is None:
-            cls.__instance = cls(logger, file_path)
-        return cls.__instance
+        if cls._instance is None:
+            cls._instance = cls(logger, file_path)
+        return cls._instance
 
     def start_stream(self) -> None:
         if self.is_streaming:
             raise RuntimeError("DATASOURCE: Playback has already started")
 
         self._logger.info("DATASOURCE: Playback Started (playing-recording)")
-        self.current_idx = 0
+        self._current_idx = 0
         self._streaming_state = StreamingState.STREAMING
 
     def stop_stream(self) -> None:
@@ -286,14 +320,16 @@ class PlaybackRecording:
         self._activity_state = ActivityState.INACTIVE
 
     def get_data(self) -> EMGArray:
-        num_of_samples_expctd = 10  # playback speed
+        expected_sample_count = round(
+            self.sampling_rate * SENSOR_POLL_INTERVAL_MS / 1000
+        )  # playback speed
 
-        end_idx = min(self.current_idx + num_of_samples_expctd, self.max_idx)
-        board_data = self.data[:, self.current_idx : end_idx]
-        self.current_idx = end_idx
+        end_idx = min(self._current_idx + expected_sample_count, self._max_idx)
+        board_data = self._data[:, self._current_idx : end_idx]
+        self._current_idx = end_idx
 
         return self._add_padding(
-            board_data, len(self._data_channels), num_of_samples_expctd
+            board_data, len(self._data_channels), expected_sample_count
         )
 
     def extract_emg_data(self, emg_with_marker_data: EMGArray) -> EMGArray:
@@ -326,6 +362,10 @@ class PlaybackRecording:
 
     def release(self) -> None:
         return None
+
+    @property
+    def sampling_rate(self) -> int:
+        return 250  # assumes cyton board
 
     @property
     def emg_channel_count(self) -> int:

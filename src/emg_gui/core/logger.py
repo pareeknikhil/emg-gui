@@ -11,34 +11,34 @@ class Logger(Protocol):
 
 
 class ConsoleLogger:
-    __instance = None
+    _instance = None
 
     @classmethod
     def get_instance(cls) -> Logger:
-        if cls.__instance is None:
-            cls.__instance = cls()
-        return cls.__instance
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
 
     def __init__(self) -> None:
-        self.logger = logging.getLogger("emg-gui")
-        self.logger.setLevel(logging.INFO)
-        self.logger.propagate = False
+        self._logger = logging.getLogger("emg-gui")
+        self._logger.setLevel(logging.INFO)
+        self._logger.propagate = False
 
-        if not self.logger.handlers:
-            self.logger.addHandler(ConsoleLogger._get_handler())
+        if not self._logger.handlers:
+            self._logger.addHandler(ConsoleLogger._get_handler())
 
     def info(self, message: str) -> None:
-        self.logger.info(msg=message)
+        self._logger.info(msg=message)
 
     def error(self, message: str) -> None:
-        self.logger.error(msg=message)
+        self._logger.error(msg=message)
 
     def release(self) -> None:
-        handlers = self.logger.handlers[:]
+        handlers = self._logger.handlers[:]
         for handler in handlers:
-            self.logger.removeHandler(handler)
+            self._logger.removeHandler(handler)
             handler.close()
-        ConsoleLogger.__instance = None
+        ConsoleLogger._instance = None
         print("Logger resources released successfully.")
 
     @staticmethod
