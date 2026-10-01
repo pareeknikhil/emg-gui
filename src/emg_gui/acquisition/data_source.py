@@ -9,9 +9,12 @@ from brainflow.data_filter import DataFilter
 from serial.tools import list_ports
 
 from emg_gui.acquisition.dataset_files import get_all_files
-from emg_gui.config.constants import (IS_SYNTHETIC_BOARD, MARKER_END_ACTIVITY,
-                                      MARKER_START_ACTIVITY,
-                                      SENSOR_POLL_INTERVAL_MS)
+from emg_gui.config.constants import (
+    IS_SYNTHETIC_BOARD,
+    MARKER_END_ACTIVITY,
+    MARKER_START_ACTIVITY,
+    SENSOR_POLL_INTERVAL_MS,
+)
 from emg_gui.core.enums import ActivityState, RecordingState, StreamingState
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray

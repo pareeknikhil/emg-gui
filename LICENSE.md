@@ -2,7 +2,7 @@
 
 MIT License
 
-Copyright (c) 2026 Nikhil Pareek 
+Copyright (c) 2026 Nikhil Pareek
 Contact: [nikhilpareek149@gmail.com](mailto:nikhilpareek149@gmail.com)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
