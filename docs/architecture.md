@@ -53,6 +53,14 @@ visualizer package owns the OpenGL-specific implementation.
   Hann-windowed STFT slice history. It is instantiated and drawn by
   `EMGOpenGLWidget`.
 
+## Interface Contracts
+
+The diagram shows the public `DataSource` and `Logger` protocols, their
+implementations, and the components that use them. Implementations satisfy the
+protocols structurally; they do not inherit from the protocol classes.
+
+![Interface contracts, implementations, and consumers](diagrams/interface-contracts.svg)
+
 ## Component Hierarchy
 
 Status labels distinguish active runtime components from unfinished work:

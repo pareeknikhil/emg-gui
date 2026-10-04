@@ -1,4 +1,4 @@
-# emg-gui
+# <img src="docs/diagrams/Ability_Logomark.svg" alt="Ability logomark" width="48" align="absmiddle"> emg-gui
 
 ## 1. Overview
 
@@ -6,7 +6,23 @@
 
 A real-time visual engine for acquiring, recording, and exploring raw and filtered EMG signals.
 
-### 1.2 Architecture
+### 1.2 Installation
+
+EMG-GUI can be installed from pypi using pip:
+
+```bash
+pip install emg-gui
+```
+
+### 1.3 How to Run
+
+TODO
+
+---
+
+## 2. Architecture and Project Structure
+
+### 2.1 Architecture
 
 The application separates sensor acquisition, interface controls, signal
 processing, and GPU rendering. Sensor polling and board stream control run on a
@@ -48,15 +64,16 @@ OpenGL widget size and the selected EMG channel count.
 See the [architecture guide](docs/architecture.md) for the detailed component
 hierarchy, data flow, and thread interaction sequences.
 
----
-
-## 2. Project Structure
+### 2.2 Directory Layout
 
 Inside this project, you'll see the following folders and files:
 
 ```text
 /
 ├── docs/
+│   ├── diagrams/
+│   │   ├── Ability_Logo.svg
+│   │   └── interface-contracts.svg
 │   └── architecture.md
 ├── src/
 │   └── emg_gui/
@@ -107,34 +124,16 @@ Inside this project, you'll see the following folders and files:
 
 ---
 
-## 3. Setup
-
-### 3.1 Using pip and requirements.txt
-
-TODO
-
-### 3.2 Using Poetry
-
-TODO
-
----
-
-## 4. How to Run
-
-TODO
-
----
-
-## 5. Contributing
+## 3. Contributing
 
 Contributions are welcome. See the [contributing guide](CONTRIBUTING.md) for
 development and linting guidelines.
 
 ---
 
-## 6. Acknowledgements
+## 4. Acknowledgements
 
-### 6.1 BrainFlow
+### 4.1 BrainFlow
 
 This project uses [BrainFlow](https://brainflow.readthedocs.io/en/stable/) for
 biosignal acquisition and hardware integration. BrainFlow provides a uniform
@@ -143,7 +142,7 @@ data across a wide range of supported boards, including OpenBCI devices.
 BrainFlow is distributed under the
 [MIT License](https://github.com/brainflow-dev/brainflow/blob/master/LICENSE).
 
-### 6.2 ModernGL Spectrogram
+### 4.2 ModernGL Spectrogram
 
 This project uses
 [nickcercone/spectrogram](https://github.com/nickcercone/spectrogram) as a
@@ -152,7 +151,7 @@ referenced project demonstrates real-time audio spectrogram visualization
 using ModernGL and is distributed under the
 [MIT License](https://github.com/nickcercone/spectrogram/blob/main/LICENCE).
 
-### 6.3 Text Rendering
+### 4.3 Text Rendering
 
 This project adapts the code in
 [How to render text with PyOpenGL?](https://stackoverflow.com/questions/63836707/how-to-render-text-with-pyopengl)
@@ -163,7 +162,7 @@ distributed under the
 
 ---
 
-## 7. Tech Debt
+## 5. Tech Debt
 
 1. Add setup and installation instructions to this readme.
 2. Create new repo-emg-ability (create import and remove run.sh).
