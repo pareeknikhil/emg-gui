@@ -3,63 +3,35 @@ name = "emg-gui"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "pareeknikhil", email = "nikhilpareek149@gmail.com"}
+    {name = "Nikhil Pareek", email = "nikhilpareek149@gmail.com"}
+]
+maintainers = [
+    {name = "Nikhil Pareek", email = "nikhilpareek149@gmail.com"}
 ]
 readme = "README.md"
 requires-python = "==3.9.10"
 dependencies = [
-    "audioread (==3.1.0)",
-    "brainflow (==5.16.0)",
-    "certifi (==2026.6.17)",
-    "cffi (==2.0.0)",
-    "charset-normalizer (==3.4.7)",
-    "contourpy (==1.3.0)",
-    "cycler (==0.12.1)",
-    "decorator (==5.3.1)",
-    "dvg-ringbuffer (==1.1.0)",
-    "fonttools (==4.60.2)",
+    "brainflow==5.16.0",
+    "dvg-ringbuffer==1.1.0",
     "freetype-py==2.5.1",
-    "glcontext (==3.0.0)",
-    "idna (==3.18)",
-    "importlib-resources (==6.5.2)",
-    "joblib (==1.5.3)",
-    "kiwisolver (==1.4.7)",
-    "lazy-loader (==0.5)",
-    "librosa (==0.11.0)",
-    "llvmlite (==0.43.0)",
-    "matplotlib (==3.9.4)",
-    "moderngl (==5.12.0)",
-    "msgpack (==1.1.2)",
-    "multipledispatch (==1.0.0)",
-    "numba (==0.60.0)",
-    "numpy (==1.26.4)",
-    "packaging (==26.2)",
-    "pillow (==11.3.0)",
-    "platformdirs (==4.4.0)",
-    "pooch (==1.9.0)",
-    "pycparser (==2.23)",
-    "pyparsing (==3.3.2)",
-    "pyqt5 (==5.15.11)",
-    "pyqt5-qt5 (==5.15.2) ; sys_platform == 'win32'",
-    "pyqt5-qt5 (==5.15.19) ; sys_platform != 'win32'",
-    "pyqt5-sip (==12.17.1)",
-    "pyrr (==0.10.3)",
-    "pyserial (==3.5)",
-    "python-dateutil (==2.9.0.post0)",
-    "python-dotenv (==1.1.1)",
-    "requests (==2.32.5)",
-    "scikit-learn (==1.6.1)",
-    "scipy (==1.13.1)",
-    "six (==1.17.0)",
-    "soundfile (==0.13.1)",
-    "soxr (==1.1.0)",
-    "threadpoolctl (==3.6.0)",
-    "typing-extensions (==4.16.0)",
-    "urllib3 (==2.6.3)",
-    "zipp (==3.23.1)",
-    "setuptools (==80.10.2)"
+    "librosa==0.11.0",
+    "matplotlib==3.9.4",
+    "moderngl==5.12.0",
+    "numpy==1.26.4",
+    "PyQt5==5.15.11",
+    "PyQt5-Qt5==5.15.2; sys_platform == 'win32'",
+    "PyQt5-Qt5==5.15.19; sys_platform != 'win32'",
+    "PyQt5-sip==12.17.1",
+    "pyrr==0.10.3",
+    "pyserial==3.5",
+    "setuptools==80.10.2",
+    "typing-extensions==4.16.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/pareeknikhil/emg-gui"
+Documentation = "https://pareeknikhil.github.io/"
+Issues = "https://github.com/pareeknikhil/emg-gui/issues"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
