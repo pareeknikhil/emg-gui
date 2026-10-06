@@ -165,7 +165,7 @@ distributed under the
 
 1. Add setup and installation instructions to this readme.
 2. Create new repo-emg-ability (create import and remove run.sh).
-3. Folder portability (use EMGFloae reference).
+3. Folder portability use [EMGFlow](https://github.com/WiIIson/EMGFlow-Python-Package/tree/main) & [system path](https://www.youtube.com/watch?v=v6tALyc4C10&t=3s) reference.
 4. Add legends for raw and filtered emg in timeseries renderer.
 5. Processing latency in the performance metrics.
 6. Improve the GUI toggle controls and expose their options in the left sidebar.
