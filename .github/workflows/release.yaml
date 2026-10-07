@@ -15,8 +15,8 @@ on:
       - "feature/**"
 
 env:
-  PACKAGE_NAME: "<PACKAGE_NAME>"
-  OWNER: "<OWNER>"
+  PACKAGE_NAME: "emg-gui>"
+  OWNER: ${{ github.repository_owner }}
 
 jobs:
   details:
@@ -27,5 +27,5 @@ jobs:
       - name: Print package and owner
         id: print
         run: |
-          echo "package name is $PACKAGE_NAME"
-          echo "owner is $OWNER"
+          echo "package name is ${{ env.PACKAGE_NAME }}"
+          echo "owner is ${{ env.OWNER }}"
