@@ -19,7 +19,7 @@ env:
   OWNER: ${{ github.repository_owner }}
 
 jobs:
-  details:
+  Version:
     runs-on: ubuntu-latest
     outputs:
       new_version: ${{ steps.release.outputs.new_version }}
@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Extract version details
+      - name: Extract release version
         id: release
         run: |
           if [ "${{ github.ref_type }}" = "tag" ]; then
@@ -46,3 +46,107 @@ jobs:
             echo "No tag found"
             exit 1
           fi
+  
+  Check-PyPi:
+    needs: Version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check current version on PyPI
+        id: check_pypi
+        run: |
+          response=$(curl -s https://pypi.org/pypi/${{ env.PACKAGE_NAME }}/json || echo "{}")
+          latest_previous_version=$(echo $response | jq --raw-output "select(.releases != null) | .releases | keys_unsorted | last")
+          if [ -z "$latest_previous_version" ]; then
+            echo "Package not found on PyPI."
+            latest_previous_version="0.0.0"
+          fi
+          echo "Latest version on PyPI: $latest_previous_version"
+          echo "latest_previous_version=$latest_previous_version" >> $GITHUB_ENV
+
+      - name: Compare versions
+        run: |
+          NEW_VERSION=${{ needs.Version.outputs.new_version }}
+          LATEST_VERSION=$latest_previous_version
+          if [ "$(printf '%s\n' "$LATEST_VERSION" "$NEW_VERSION" | sort -rV | head -n 1)" != "$NEW_VERSION" ] || [ "$NEW_VERSION" == "$LATEST_VERSION" ]; then
+            echo "The new version $NEW_VERSION is not greater than the latest version $LATEST_VERSION on PyPI."
+            exit 1
+          else
+            echo "The new version $NEW_VERSION is greater than the latest version $LATEST_VERSION on PyPI."
+          fi
+
+  Build-with-Poetry:
+    needs: [Version, Check-PyPi]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Set project version with Poetry
+        run: |
+          poetry version ${{ needs.Version.outputs.new_version }}
+
+      - name: Install dependencies
+        run: poetry install --sync --no-interaction
+
+      - name: Build source and wheel distribution
+        run: |
+          poetry build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
+  
+  PyPi-Publish:
+    name: Upload release to PyPI
+    needs: [Build-with-Poetry, Version]
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+    permissions:
+      id-token: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+  
+  Github-Release:
+    name: Create GitHub Release
+    needs: [Build-with-Poetry, Version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+      - name: Create GitHub Release
+        id: create_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ needs.Version.outputs.tag_name }} dist/* --title ${{ needs.Version.outputs.tag_name }} --generate-notes
