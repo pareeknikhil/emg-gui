@@ -9,7 +9,7 @@ maintainers = [
     {name = "Nikhil Pareek", email = "nikhilpareek149@gmail.com"}
 ]
 readme = "README.md"
-requires-python = "==3.9.10"
+requires-python = "==3.12.10"
 dependencies = [
     "brainflow==5.16.0",
     "dvg-ringbuffer==1.1.0",
