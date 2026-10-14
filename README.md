@@ -1,5 +1,10 @@
 # <img src="https://raw.githubusercontent.com/pareeknikhil/emg-gui/main/docs/diagrams/ability-logo.svg" alt="Ability logomark" width="48" align="absmiddle"> emg-gui
 
+[![Python versions](https://img.shields.io/pypi/pyversions/emg-gui.svg?logo=python&logoColor=FFE873)](https://pypi.org/project/emg-gui/)
+[![PyPI version](https://img.shields.io/pypi/v/emg-gui.svg)](https://pypi.org/project/emg-gui/)
+[![Monthly downloads](https://static.pepy.tech/badge/emg-gui/month)](https://pepy.tech/project/emg-gui)
+[![Total downloads](https://static.pepy.tech/badge/emg-gui)](https://pepy.tech/project/emg-gui)
+
 ## 1. Overview
 
 ### 1.1 Introduction
