@@ -1,4 +1,4 @@
-# <img src="docs/diagrams/Ability_Logomark.svg" alt="Ability logomark" width="48" align="absmiddle"> emg-gui
+# <img src="https://raw.githubusercontent.com/pareeknikhil/emg-gui/main/docs/diagrams/ability-logo.svg" alt="Ability logomark" width="48" align="absmiddle"> emg-gui
 
 ## 1. Overview
 
