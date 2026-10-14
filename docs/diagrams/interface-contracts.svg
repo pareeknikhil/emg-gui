@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1360" viewBox="0 0 1800 1360">
+  <title>emg-gui interface contracts</title>
+  <desc>DataSource and Logger Python protocols, their structural implementations, and the components that depend on them. Dashed open arrows mean uses; dashed hollow-triangle arrows mean structurally implements, not class inheritance.</desc>
+  <style>
+    text { font-family: DejaVu Sans, sans-serif; fill: #17212b; }
+    .heading { font-size: 36px; font-weight: bold; }
+    .subtitle { font-size: 19px; fill: #53616e; }
+    .section { font-size: 22px; font-weight: bold; }
+    .column { font-size: 14px; font-weight: bold; fill: #53616e; }
+    .name { font-size: 24px; font-weight: bold; }
+    .kind { font-size: 14px; fill: #53616e; }
+    .contract-name { font-size: 27px; font-weight: bold; fill: #15518a; }
+    .contract-kind { font-size: 14px; fill: #15518a; }
+    .group { font-size: 14px; font-weight: bold; fill: #53616e; }
+    .api { font-family: DejaVu Sans Mono, monospace; font-size: 17px; }
+    .small-api { font-family: DejaVu Sans Mono, monospace; font-size: 14px; }
+    .body { font-size: 16px; }
+    .edge-label { font-size: 15px; fill: #53616e; }
+    .note { font-size: 15px; fill: #53616e; }
+    .source { font-size: 13px; fill: #647280; }
+  </style>
+  <rect width="1800" height="1360" fill="#ffffff"/>
+
+  <text x="60" y="65" class="heading">emg-gui | Interface contracts</text>
+  <text x="60" y="100" class="subtitle">Public Python APIs, their implementations, and the components that use them</text>
+
+  <text x="60" y="150" class="section">Acquisition interface</text>
+  <text x="60" y="184" class="column">CONSUMERS</text>
+  <text x="600" y="184" class="column">PUBLIC CONTRACT</text>
+  <text x="1370" y="184" class="column">IMPLEMENTATIONS</text>
+
+  <!-- DataSource: all declared public methods and properties. -->
+  <rect x="600" y="205" width="610" height="612" rx="4" fill="#ffffff" stroke="#3980ba" stroke-width="2"/>
+  <rect x="601" y="206" width="608" height="79" fill="#eaf3fc"/>
+  <text x="626" y="234" class="contract-kind">&lt;&lt;Protocol&gt;&gt;</text>
+  <text x="626" y="266" class="contract-name">DataSource</text>
+  <line x1="600" y1="285" x2="1210" y2="285" stroke="#3980ba"/>
+  <text x="626" y="310" class="group">PROPERTIES</text>
+  <text x="626" y="337" class="api">+ sampling_rate: int</text>
+  <text x="626" y="364" class="api">+ emg_channel_count: int</text>
+  <text x="626" y="391" class="api">+ is_streaming: bool</text>
+  <text x="626" y="418" class="api">+ is_recording: bool</text>
+  <text x="626" y="445" class="api">+ is_active: bool</text>
+  <line x1="600" y1="466" x2="1210" y2="466" stroke="#c9d9e6"/>
+  <text x="626" y="491" class="group">METHODS</text>
+  <text x="626" y="518" class="api">+ start_stream() -&gt; None</text>
+  <text x="626" y="545" class="api">+ stop_stream() -&gt; None</text>
+  <text x="626" y="572" class="api">+ start_recording() -&gt; None</text>
+  <text x="626" y="599" class="api">+ stop_recording() -&gt; None</text>
+  <text x="626" y="626" class="api">+ record(data) -&gt; None</text>
+  <text x="626" y="653" class="api">+ insert_start_marker() -&gt; None</text>
+  <text x="626" y="680" class="api">+ insert_stop_marker() -&gt; None</text>
+  <text x="626" y="707" class="api">+ get_data() -&gt; EMGArray</text>
+  <text x="626" y="734" class="api">+ extract_emg_data(EMGArray) -&gt; EMGArray</text>
+  <text x="626" y="761" class="api">+ write_to_csv(str, str) -&gt; None</text>
+  <text x="626" y="788" class="api">+ release() -&gt; None</text>
+
+  <!-- Consumers reference the protocol, not a specific board class. -->
+  <rect x="60" y="315" width="370" height="180" rx="4" fill="#ffffff" stroke="#8b98a5" stroke-width="1.5"/>
+  <rect x="61" y="316" width="368" height="64" fill="#f0f3f6"/>
+  <text x="82" y="349" class="name">SensorWorker</text>
+  <text x="82" y="371" class="kind">QObject</text>
+  <line x1="60" y1="380" x2="430" y2="380" stroke="#cbd3db"/>
+  <text x="82" y="411" class="body">Receives board: DataSource</text>
+  <text x="82" y="440" class="small-api">get_data(), record(), extract_emg_data()</text>
+  <text x="82" y="469" class="body">Stream, recording, and marker control</text>
+
+  <rect x="60" y="595" width="370" height="185" rx="4" fill="#ffffff" stroke="#8b98a5" stroke-width="1.5"/>
+  <rect x="61" y="596" width="368" height="64" fill="#f0f3f6"/>
+  <text x="82" y="629" class="name" font-size="22">EMGVisualizerWindow</text>
+  <text x="82" y="651" class="kind">QMainWindow</text>
+  <line x1="60" y1="660" x2="430" y2="660" stroke="#cbd3db"/>
+  <text x="82" y="691" class="body">Receives board: DataSource</text>
+  <text x="82" y="720" class="small-api">sampling_rate, emg_channel_count</text>
+  <text x="82" y="751" class="body">Passes the source to SensorWorker</text>
+
+  <path d="M 430 405 H 599" fill="none" stroke="#657686" stroke-width="2" stroke-dasharray="7 5"/>
+  <path d="M 587 398 L 599 405 L 587 412" fill="none" stroke="#657686" stroke-width="2"/>
+  <text x="484" y="389" class="edge-label">uses</text>
+  <path d="M 430 690 H 599" fill="none" stroke="#657686" stroke-width="2" stroke-dasharray="7 5"/>
+  <path d="M 587 683 L 599 690 L 587 697" fill="none" stroke="#657686" stroke-width="2"/>
+  <text x="484" y="674" class="edge-label">uses</text>
+
+  <!-- Structural implementations: the arrows point toward the protocol. -->
+  <rect x="1370" y="315" width="370" height="180" rx="4" fill="#ffffff" stroke="#3d8c75" stroke-width="1.5"/>
+  <rect x="1371" y="316" width="368" height="64" fill="#eaf6f0"/>
+  <text x="1392" y="349" class="name">OpenBCIBoard</text>
+  <text x="1392" y="371" class="kind">Board-backed implementation</text>
+  <line x1="1370" y1="380" x2="1740" y2="380" stroke="#bdd9cd"/>
+  <text x="1392" y="411" class="small-api">get_instance(logger) -&gt; DataSource</text>
+  <text x="1392" y="440" class="body">Delegates to BrainFlow BoardShim</text>
+  <text x="1392" y="469" class="body">Cyton or synthetic board</text>
+
+  <rect x="1370" y="595" width="370" height="185" rx="4" fill="#ffffff" stroke="#3d8c75" stroke-width="1.5"/>
+  <rect x="1371" y="596" width="368" height="64" fill="#eaf6f0"/>
+  <text x="1392" y="629" class="name">PlaybackRecording</text>
+  <text x="1392" y="651" class="kind">File-backed implementation</text>
+  <line x1="1370" y1="660" x2="1740" y2="660" stroke="#bdd9cd"/>
+  <text x="1392" y="691" class="body">EMG batches from a saved recording</text>
+  <text x="1392" y="720" class="small-api">record() / write_to_csv(): no-op</text>
+  <text x="1392" y="751" class="small-api">release(): no-op</text>
+
+  <path d="M 1370 405 H 1228" fill="none" stroke="#3d8c75" stroke-width="2" stroke-dasharray="7 5"/>
+  <path d="M 1211 405 L 1228 395 L 1228 415 Z" fill="#ffffff" stroke="#3d8c75" stroke-width="2"/>
+  <text x="1247" y="389" class="edge-label">implements</text>
+  <path d="M 1370 690 H 1228" fill="none" stroke="#3d8c75" stroke-width="2" stroke-dasharray="7 5"/>
+  <path d="M 1211 690 L 1228 680 L 1228 700 Z" fill="#ffffff" stroke="#3d8c75" stroke-width="2"/>
+  <text x="1247" y="674" class="edge-label">implements</text>
+
+  <text x="600" y="847" class="note">EMGArray: NumPy array; acquisition batches use rows x samples.</text>
+  <line x1="60" y1="895" x2="1740" y2="895" stroke="#d9e0e6" stroke-width="1.5"/>
+
+  <text x="60" y="940" class="section">Logging interface</text>
+
+  <rect x="600" y="970" width="610" height="210" rx="4" fill="#ffffff" stroke="#3980ba" stroke-width="2"/>
+  <rect x="601" y="971" width="608" height="69" fill="#eaf3fc"/>
+  <text x="626" y="996" class="contract-kind">&lt;&lt;Protocol&gt;&gt;</text>
+  <text x="626" y="1026" class="contract-name">Logger</text>
+  <line x1="600" y1="1040" x2="1210" y2="1040" stroke="#3980ba"/>
+  <text x="626" y="1076" class="api">+ info(message: str) -&gt; None</text>
+  <text x="626" y="1112" class="api">+ error(message: str) -&gt; None</text>
+  <text x="626" y="1148" class="api">+ release() -&gt; None</text>
+
+  <rect x="60" y="990" width="370" height="190" rx="4" fill="#f7f9fa" stroke="#8b98a5" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="82" y="1026" class="name">Logger consumers</text>
+  <text x="82" y="1051" class="kind">Grouped dependencies, not a class</text>
+  <line x1="82" y1="1070" x2="408" y2="1070" stroke="#cbd3db"/>
+  <text x="82" y="1100" class="body">App, acquisition, UI, and renderers</text>
+  <text x="82" y="1132" class="body">Use the Logger contract</text>
+
+  <rect x="1370" y="990" width="370" height="190" rx="4" fill="#ffffff" stroke="#3d8c75" stroke-width="1.5"/>
+  <rect x="1371" y="991" width="368" height="64" fill="#eaf6f0"/>
+  <text x="1392" y="1025" class="name">ConsoleLogger</text>
+  <text x="1392" y="1047" class="kind">Logging implementation</text>
+  <line x1="1370" y1="1055" x2="1740" y2="1055" stroke="#bdd9cd"/>
+  <text x="1392" y="1090" class="small-api">get_instance() -&gt; Logger</text>
+  <text x="1392" y="1120" class="body">Uses Python logging</text>
+  <text x="1392" y="1150" class="body">Writes to a console handler</text>
+
+  <path d="M 430 1090 H 599" fill="none" stroke="#657686" stroke-width="2" stroke-dasharray="7 5"/>
+  <path d="M 587 1083 L 599 1090 L 587 1097" fill="none" stroke="#657686" stroke-width="2"/>
+  <text x="484" y="1074" class="edge-label">uses</text>
+  <path d="M 1370 1090 H 1228" fill="none" stroke="#3d8c75" stroke-width="2" stroke-dasharray="7 5"/>
+  <path d="M 1211 1090 L 1228 1080 L 1228 1100 Z" fill="#ffffff" stroke="#3d8c75" stroke-width="2"/>
+  <text x="1247" y="1074" class="edge-label">implements</text>
+
+  <line x1="60" y1="1220" x2="1740" y2="1220" stroke="#d9e0e6"/>
+  <path d="M 60 1252 H 130" fill="none" stroke="#657686" stroke-width="2" stroke-dasharray="7 5"/>
+  <path d="M 118 1245 L 130 1252 L 118 1259" fill="none" stroke="#657686" stroke-width="2"/>
+  <text x="147" y="1258" class="note">Uses an interface</text>
+  <path d="M 400 1252 H 462" fill="none" stroke="#3d8c75" stroke-width="2" stroke-dasharray="7 5"/>
+  <path d="M 480 1252 L 463 1242 L 463 1262 Z" fill="#ffffff" stroke="#3d8c75" stroke-width="2"/>
+  <text x="500" y="1258" class="note">Structurally implements a protocol</text>
+  <text x="1060" y="1258" class="note">+ public member; private helpers omitted</text>
+  <text x="60" y="1297" class="note">Implementations match the required API; they do not inherit from the protocol classes. Selected parameter names are omitted for compactness.</text>
+  <text x="60" y="1329" class="source">Sources: acquisition/data_source.py, acquisition/sensor_worker.py, ui/window.py, core/logger.py | Code snapshot: 2026-10-03</text>
+</svg>

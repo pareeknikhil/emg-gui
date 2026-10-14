@@ -1,12 +1,10 @@
 name: Super-Linter
 
 on:
-  # Run on pushes to feature branch
   push:
     branches:
       - "feature/**"
 
-  # Run when a PR targets main/master
   pull_request:
     branches:
       - main
