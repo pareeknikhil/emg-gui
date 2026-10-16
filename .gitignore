@@ -200,13 +200,4 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Artifacts
-/data/artifacts/model_summary.txt
-/data/artifacts/confusion_matrix.png
-/data/model/*.keras
-!/data/tensorboard_logs/embedding/.gitkeep
-/data/tfrecords/train/*.tfrecord
-/data/tfrecords/test/*.tfrecord
-/data/tfrecords/validate/*.tfrecord
-/mlruns
 .python-version
