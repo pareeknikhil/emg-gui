@@ -1,9 +1,9 @@
-from importlib import resources
+from importlib.resources import files
 
 
 def _load_shader_file(*paths: str) -> str:
     return (
-        resources.files("emg_gui.visualizer.shaders")
+        files("emg_gui.visualizer.shaders")
         .joinpath(*paths)
         .read_text(encoding="utf-8")
     )

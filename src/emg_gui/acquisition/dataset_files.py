@@ -1,14 +1,12 @@
 import glob
 import os
 import random
-from pathlib import Path
-
-_CSV_PATH = Path("data/csv")
+from importlib.resources import files
 
 
-def get_all_labels(selected_type="train") -> list[str]:  # Default from train
-    train_path = os.path.join(_CSV_PATH, selected_type)
-    return os.listdir(path=train_path)
+def get_all_labels(selected_type: str = "train") -> list[str]:  # Default from train
+    train_path = files("emg_gui.data.csv").joinpath(selected_type)
+    return os.listdir(path=str(train_path))
 
 
 def get_all_files(pattern: str, shuffle_flag: bool) -> list[str]:

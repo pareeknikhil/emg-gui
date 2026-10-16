@@ -130,7 +130,7 @@ Inside this project, you'll see the following folders and files:
 
 ## 3. Contributing
 
-Contributions are welcome. See the [contributing guide](CONTRIBUTING.md) for
+Contributions are welcome! See the [contributing guide](CONTRIBUTING.md) for
 development and linting guidelines.
 
 ---
