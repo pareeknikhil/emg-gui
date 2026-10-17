@@ -1,34 +1,17 @@
-<h1 align="center">EMG-GUI</h1>
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/pareeknikhil/emg-gui/main/docs/diagrams/ability-logo.svg" alt="Ability logomark" height="160">
+  <br>
+  EMG-GUI
+  <br>
+  <a href="https://pypi.org/project/emg-gui/"><img alt="Python versions" src="https://img.shields.io/pypi/pyversions/emg-gui?logo=python&amp;logoColor=FFE873"></a>
+  <a href="https://pypi.org/project/emg-gui/"><img alt="PyPI version" src="https://img.shields.io/pypi/v/emg-gui"></a>
+  <a href="https://pepy.tech/project/emg-gui"><img alt="Monthly PyPI downloads" src="https://api.pepy.tech/personalized-badge/emg-gui?period=MONTH&amp;units=INTERNATIONAL_SYSTEM&amp;left_color=GREY&amp;right_color=BLUE&amp;left_text=pypi%20downloads%2Fmonth"></a>
+  <a href="https://pepy.tech/project/emg-gui"><img alt="Total PyPI downloads" src="https://api.pepy.tech/personalized-badge/emg-gui?period=TOTAL&amp;units=INTERNATIONAL_SYSTEM&amp;left_color=GREY&amp;right_color=BLUE&amp;left_text=pypi%20downloads"></a>
+  <a href="https://github.com/pareeknikhil/emg-gui/releases"><img alt="GitHub release downloads" src="https://badgen.net/github/assets-dl/pareeknikhil/emg-gui/total?label=github%20downloads&amp;color=yellow"></a>
+</h1>
 
 <p align="center">
   <em>A high-performance, multithreaded, real-time visualization engine for acquiring, recording, and exploring raw and filtered EMG signals from OpenBCI boards.</em>
-</p>
-
-<p align="center">
-  <img
-    src="https://raw.githubusercontent.com/pareeknikhil/emg-gui/main/docs/diagrams/ability-logo.svg"
-    alt="Ability logomark"
-    width="400"
-    height="160"
-  >
-</p>
-
-<p align="center">
-  <a href="https://pypi.org/project/emg-gui/">
-    <img alt="Python versions" src="https://img.shields.io/pypi/pyversions/emg-gui?logo=python&amp;logoColor=FFE873">
-  </a>
-  <a href="https://pypi.org/project/emg-gui/">
-    <img alt="PyPI version" src="https://img.shields.io/pypi/v/emg-gui">
-  </a>
-  <a href="https://pepy.tech/project/emg-gui">
-    <img alt="Monthly downloads" src="https://static.pepy.tech/badge/emg-gui/month">
-  </a>
-  <a href="https://pepy.tech/project/emg-gui">
-    <img alt="Total downloads" src="https://static.pepy.tech/badge/emg-gui">
-  </a>
-  <a href="https://github.com/pareeknikhil/emg-gui/releases">
-    <img alt="GitHub release downloads" src="https://img.shields.io/github/downloads/pareeknikhil/emg-gui/total?color=yellow&amp;label=Downloads%28GitHub%29">
-  </a>
 </p>
 
 ## 1. Overview
