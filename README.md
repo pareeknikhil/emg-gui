@@ -13,7 +13,7 @@
   <a href="https://pypi.org/project/emg-gui/"><img alt="PyPI version" src="https://img.shields.io/pypi/v/emg-gui"></a>
   <a href="https://pepy.tech/project/emg-gui"><img alt="Monthly downloads" src="https://static.pepy.tech/badge/emg-gui/month"></a>
   <a href="https://pepy.tech/project/emg-gui"><img alt="Total downloads" src="https://static.pepy.tech/badge/emg-gui"></a>
-  <a href="https://github.com/pareeknikhil/emg-gui/releases"><img alt="GitHub release downloads" src="https://img.shields.io/github/downloads/pareeknikhil/emg-gui/total.svg?label=gitHub%20downloads&amp;color=yellow"></a>
+  <a href="https://github.com/pareeknikhil/emg-gui/releases"><img alt="GitHub release downloads" src="https://img.shields.io/github/downloads/pareeknikhil/emg-gui/total.svg?label=github%20downloads&amp;color=yellow"></a>
 </p>
 
 ## 1. Overview
