@@ -9,7 +9,7 @@ maintainers = [
     {name = "Nikhil Pareek", email = "nikhilpareek149@gmail.com"}
 ]
 readme = "README.md"
-requires-python = "==3.12.10"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "brainflow==5.16.0",
     "dvg-ringbuffer==1.1.0",
@@ -37,12 +37,15 @@ Issues = "https://github.com/pareeknikhil/emg-gui/issues"
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[project.scripts]
-emg-gui = "emg_gui.app:main"
-
 [tool.poetry]
 packages = [{ include = "emg_gui", from = "src" }]
 include = [
+    { path = "src/emg_gui/py.typed", format = ["sdist", "wheel"] },
     { path = "src/emg_gui/visualizer/shaders/**/*.glsl", format = ["sdist", "wheel"] },
     { path = "src/emg_gui/config/*.ttf", format = ["sdist", "wheel"] },
+]
+
+[dependency-groups]
+dev = [
+    "types-pyserial (>=3.5.0.20260712,<4.0.0.0)"
 ]

@@ -11,13 +11,6 @@ class Logger(Protocol):
 
 
 class ConsoleLogger:
-    _instance = None
-
-    @classmethod
-    def get_instance(cls) -> Logger:
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
 
     def __init__(self) -> None:
         self._logger = logging.getLogger("emg-gui")
@@ -38,7 +31,6 @@ class ConsoleLogger:
         for handler in handlers:
             self._logger.removeHandler(handler)
             handler.close()
-        ConsoleLogger._instance = None
         print("Logger resources released successfully.")
 
     @staticmethod

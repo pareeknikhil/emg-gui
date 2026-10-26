@@ -1,31 +1,16 @@
-from brainflow.board_shim import BoardIds, BoardShim
-from brainflow.data_filter import AggOperations, DataFilter, FilterTypes, NoiseTypes
+from brainflow.data_filter import DataFilter  # type: ignore[import-untyped]
+from brainflow.data_filter import FilterTypes
 
-from emg_gui.config.constants import IS_SYNTHETIC_BOARD
 from emg_gui.core.types import EMGArray
 
-_BOARD_ID = BoardIds.SYNTHETIC_BOARD if IS_SYNTHETIC_BOARD else BoardIds.CYTON_BOARD
 
-
-def filter_data(time_series: EMGArray) -> None:
-
-    DataFilter.perform_rolling_filter(time_series, 3, AggOperations.MEAN.value)
-
-    DataFilter.perform_bandstop(
-        data=time_series,
-        sampling_rate=BoardShim.get_sampling_rate(_BOARD_ID),
-        start_freq=58.0,
-        stop_freq=62.0,
-        order=4,
-        filter_type=FilterTypes.BUTTERWORTH,
-        ripple=1.0,
-    )
+def filter_data(time_series: EMGArray, sampling_rate: int, noise_type: int) -> None:
 
     DataFilter.perform_bandpass(
         data=time_series,
-        sampling_rate=BoardShim.get_sampling_rate(_BOARD_ID),
+        sampling_rate=sampling_rate,
         start_freq=10.0,
-        stop_freq=125.0,
+        stop_freq=float(sampling_rate/2),  # Nyquist frequency
         order=4,
         filter_type=FilterTypes.BUTTERWORTH,
         ripple=1.0,
@@ -33,12 +18,6 @@ def filter_data(time_series: EMGArray) -> None:
 
     DataFilter.remove_environmental_noise(
         data=time_series,
-        sampling_rate=BoardShim.get_sampling_rate(_BOARD_ID),
-        noise_type=NoiseTypes.FIFTY.value,
-    )
-
-    DataFilter.remove_environmental_noise(
-        data=time_series,
-        sampling_rate=BoardShim.get_sampling_rate(_BOARD_ID),
-        noise_type=NoiseTypes.SIXTY.value,
+        sampling_rate=sampling_rate,
+        noise_type=noise_type,
     )

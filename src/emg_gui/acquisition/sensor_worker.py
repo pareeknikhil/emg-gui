@@ -1,13 +1,9 @@
 import numpy as np
-from dvg_ringbuffer import RingBuffer
+from dvg_ringbuffer import RingBuffer  # type: ignore[import-untyped]
 from PyQt5.QtCore import QObject, QTimer, pyqtSignal, pyqtSlot
 
 from emg_gui.acquisition.data_source import DataSource
-from emg_gui.config.constants import (
-    EDGE_ARTIFACT_BUFFER,
-    SENSOR_POLL_INTERVAL_MS,
-    TIME_WINDOW_SAMPLES,
-)
+from emg_gui.config.constants import EDGE_ARTIFACT_BUFFER, TIME_WINDOW_SAMPLES
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 
@@ -44,7 +40,7 @@ class SensorWorker(QObject):
 
         self._sensor_timer = QTimer(self)
         self._sensor_timer.timeout.connect(self._receive_sensor_data)
-        self._sensor_timer.setInterval(SENSOR_POLL_INTERVAL_MS)
+        self._sensor_timer.setInterval(board.polling_interval_ms)
 
     @pyqtSlot()
     def _receive_sensor_data(self) -> None:

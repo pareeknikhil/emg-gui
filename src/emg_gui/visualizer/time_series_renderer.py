@@ -6,9 +6,7 @@ from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 from emg_gui.processing.window_functions import orthographic
 from emg_gui.visualizer.shaders.shader_loader import (
-    time_series_fragment_shader,
-    time_series_vertex_shader,
-)
+    time_series_fragment_shader, time_series_vertex_shader)
 
 
 class TimeSeriesRenderer:
@@ -48,7 +46,7 @@ class TimeSeriesRenderer:
             start=w_offset, stop=w, num=TIME_WINDOW_SAMPLES, dtype="f4"
         )
         P = orthographic(w, h)
-        self._prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
+        self._prog["P"].write(P)  # type: ignore[union-attr]
 
     def draw(self, raw_snapshot: EMGArray, filtered_snapshot: EMGArray) -> None:
 

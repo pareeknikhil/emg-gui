@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QWidget
 
 from emg_gui.acquisition.data_source import DataSource
 from emg_gui.acquisition.sensor_worker import SensorWorker
+from emg_gui.core.enums import MainsFrequency
 from emg_gui.core.logger import Logger
 from emg_gui.ui.control_panel import EMGControlPanel
 from emg_gui.visualizer.open_gl_widget import EMGOpenGLWidget
@@ -10,7 +11,7 @@ from emg_gui.visualizer.open_gl_widget import EMGOpenGLWidget
 
 class EMGVisualizerWindow(QMainWindow):
 
-    def __init__(self, logger: Logger, board: DataSource) -> None:
+    def __init__(self, logger: Logger, board: DataSource, mains_frequency: MainsFrequency) -> None:
         super().__init__()
 
         self._logger = logger
@@ -21,7 +22,7 @@ class EMGVisualizerWindow(QMainWindow):
         self._control_section = EMGControlPanel()
 
         self._open_gl_widget = EMGOpenGLWidget(
-            self._logger, board.emg_channel_count, board.sampling_rate
+            logger=self._logger, number_of_emg_channels=board.emg_channel_count, sampling_rate=board.sampling_rate, mains_frequency=mains_frequency
         )
 
         main_layout = QHBoxLayout()
@@ -87,9 +88,9 @@ class EMGVisualizerWindow(QMainWindow):
         super().closeEvent(a0)
 
     @classmethod
-    def run(cls, logger: Logger, board: DataSource) -> None:
+    def run(cls, logger: Logger, board: DataSource, mains_frequency: MainsFrequency) -> None:
         QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
         qt_app = QApplication([])
-        window = cls(logger, board)
+        window = cls(logger, board, mains_frequency)
         window.show()
         qt_app.exit(qt_app.exec())

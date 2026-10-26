@@ -1675,6 +1675,18 @@ files = [
 ]
 
 [[package]]
+name = "types-pyserial"
+version = "3.5.0.20260712"
+description = "Typing stubs for pyserial"
+optional = false
+python-versions = ">=3.10"
+groups = ["dev"]
+files = [
+    {file = "types_pyserial-3.5.0.20260712-py3-none-any.whl", hash = "sha256:ee4f34b7432a0608bb016c88cb5b1ad3b960df4784289de56dda471503ceb53d"},
+    {file = "types_pyserial-3.5.0.20260712.tar.gz", hash = "sha256:19c0a184e9f39e1282783ed7d35d89d73503bd482b39e072299983704e805d00"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.16.0"
 description = "Backported and Experimental Type Hints for Python 3.9+"
@@ -1706,5 +1718,5 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
 [metadata]
 lock-version = "2.1"
-python-versions = "==3.12.10"
-content-hash = "79169b9db333d9a16d5f06eb53eda015a85370ab9c59fc5ef29edb124b649034"
+python-versions = ">=3.12,<3.13"
+content-hash = "bc43a758ff5b707b82a18d03daa39e5eeced310471166c5abdb475f363ba02db"
