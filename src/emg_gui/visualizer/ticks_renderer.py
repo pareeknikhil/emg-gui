@@ -5,10 +5,8 @@ import numpy as np
 
 from emg_gui.core.logger import Logger
 from emg_gui.processing.window_functions import orthographic
-from emg_gui.visualizer.shaders.shader_loader import (
-    ticks_fragment_shader,
-    ticks_vertex_shader,
-)
+from emg_gui.visualizer.shaders.shader_loader import (ticks_fragment_shader,
+                                                      ticks_vertex_shader)
 
 
 class TicksRenderer:
@@ -36,7 +34,7 @@ class TicksRenderer:
 
     def size(self, w: int, h: int, w_offset: int, h_offset: int) -> None:
         P = orthographic(w, h)
-        self._prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
+        self._prog["P"].write(P)  # type: ignore[union-attr]
 
         vertices = self._build_vertices(w, h, w_offset, h_offset)
 

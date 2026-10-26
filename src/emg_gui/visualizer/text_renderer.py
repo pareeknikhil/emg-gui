@@ -1,17 +1,17 @@
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
-import freetype
+import freetype  # type: ignore[import-untyped]
 import moderngl
 import numpy as np
 
-from emg_gui.config.constants import TEXT_FONT_SIZE, TEXT_PIXEL_TICKS, TEXT_SCALE
+from emg_gui.config.constants import (TEXT_FONT_SIZE, TEXT_PIXEL_TICKS,
+                                      TEXT_SCALE)
 from emg_gui.core.logger import Logger
 from emg_gui.processing.window_functions import orthographic
-from emg_gui.visualizer.shaders.shader_loader import (
-    text_fragment_shader,
-    text_vertex_shader,
-)
+from emg_gui.visualizer.shaders.shader_loader import (text_fragment_shader,
+                                                      text_vertex_shader)
 
 
 class CharacterSlot:
@@ -60,8 +60,8 @@ class TextRenderer:
 
         self._prog["color"] = (0.5, 0.5, 0.55, 1)
 
-        _font_path = Path("src/emg_gui/config/Roboto-Black.ttf")
-        self.init_font(_font_path.as_posix(), moderngl_context)
+        _font_path = files("emg_gui.config").joinpath("Roboto-Black.ttf")
+        self.init_font(str(_font_path), moderngl_context)
 
         self.texts: list[tuple[str, float, float, str]] = []
 
@@ -122,7 +122,7 @@ class TextRenderer:
 
     def size(self, w, h, w_offset, h_offset) -> None:
         P = orthographic(w, h)
-        self._prog["P"].write(P)  # pyright: ignore[reportAttributeAccessIssue]
+        self._prog["P"].write(P)  # type: ignore[union-attr]
 
         self.texts.clear()
 
