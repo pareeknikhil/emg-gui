@@ -24,6 +24,7 @@ class DatasetSplit(str, Enum):
     VALIDATE = "validate"
     TEST = "test"
 
+
 class OpenBCIBoardType(IntEnum):
     CYTON_SERIAL = BoardIds.CYTON_BOARD
     CYTON_DAISY_SERIAL = BoardIds.CYTON_DAISY_BOARD
@@ -33,6 +34,7 @@ class OpenBCIBoardType(IntEnum):
     CYTON_DAISY_WIFI = BoardIds.CYTON_DAISY_WIFI_BOARD
     GANGLION_WIFI = BoardIds.GANGLION_WIFI_BOARD
     SYNTHETIC = BoardIds.SYNTHETIC_BOARD
+
 
 class MainsFrequency(IntEnum):
     FIFTY_HZ = NoiseTypes.FIFTY

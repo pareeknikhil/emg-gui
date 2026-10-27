@@ -10,7 +10,7 @@ def filter_data(time_series: EMGArray, sampling_rate: int, noise_type: int) -> N
         data=time_series,
         sampling_rate=sampling_rate,
         start_freq=10.0,
-        stop_freq=float(sampling_rate/2),  # Nyquist frequency
+        stop_freq=float(sampling_rate / 2),  # Nyquist frequency
         order=4,
         filter_type=FilterTypes.BUTTERWORTH,
         ripple=1.0,
