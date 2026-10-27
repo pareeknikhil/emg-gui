@@ -10,8 +10,12 @@ from brainflow.data_filter import DataFilter  # type: ignore[import-untyped]
 
 from emg_gui.acquisition.dataset_files import get_all_files
 from emg_gui.config.constants import MARKER_END_ACTIVITY, MARKER_START_ACTIVITY
-from emg_gui.core.enums import (ActivityState, OpenBCIBoardType,
-                                RecordingState, StreamingState)
+from emg_gui.core.enums import (
+    ActivityState,
+    OpenBCIBoardType,
+    RecordingState,
+    StreamingState,
+)
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 

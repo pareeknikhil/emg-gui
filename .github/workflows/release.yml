@@ -98,7 +98,7 @@ jobs:
 
       - name: Set project version with Poetry
         run: |
-          poetry version ${NEEDS_VERSION_OUTPUTS_NEW_VERSION}
+          poetry version "${NEEDS_VERSION_OUTPUTS_NEW_VERSION}"
         env:
           NEEDS_VERSION_OUTPUTS_NEW_VERSION: ${{ needs.Version.outputs.new_version }}
 
@@ -155,4 +155,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           NEEDS_VERSION_OUTPUTS_TAG_NAME: ${{ needs.Version.outputs.tag_name }}
         run: |
-          gh release create ${NEEDS_VERSION_OUTPUTS_TAG_NAME} dist/* --title ${NEEDS_VERSION_OUTPUTS_TAG_NAME} --generate-notes
+          gh release create "${NEEDS_VERSION_OUTPUTS_TAG_NAME}" dist/* --title "${NEEDS_VERSION_OUTPUTS_TAG_NAME}" --generate-notes
