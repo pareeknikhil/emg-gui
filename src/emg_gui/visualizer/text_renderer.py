@@ -1,5 +1,4 @@
 from importlib.resources import files
-from pathlib import Path
 from typing import Any
 
 import freetype  # type: ignore[import-untyped]

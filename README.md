@@ -83,6 +83,7 @@ Inside this project, you'll see the following folders and files:
 ├── docs/
 │   ├── diagrams/
 │   │   ├── Ability_Logo.svg
+│   │   ├── current-filter-frequency-response.png
 │   │   └── interface-contracts.svg
 │   └── architecture.md
 ├── src/
@@ -130,6 +131,31 @@ Inside this project, you'll see the following folders and files:
 ├── pyproject.toml
 └── README.md
 ```
+
+### 2.3 Planned Live Frequency-Domain View
+
+A future interface will add a live frequency-domain view rendered with ModernGL,
+using the same GPU-based approach as the raw and filtered EMG time-series view.
+The interface will show one selected EMG channel at a time with:
+
+- raw and filtered Welch power spectral density (PSD) curves;
+- an attenuation curve calculated from the filtered and raw PSDs;
+- frequency and decibel axes, a channel selector, and a raw/filtered legend.
+
+The existing filtering path will continue to run only once per snapshot. The raw
+and filtered arrays will then be shared by the time-domain and frequency-domain
+renderers. Welch calculations should be vectorized across channels, performed
+only for new snapshots, and throttled to approximately 5–10 updates per second so
+they do not delay the main Qt/OpenGL render loop. The resulting frequency and
+power values will be uploaded to dynamic ModernGL buffers and drawn as line
+strips using the existing line-shader approach.
+
+The following white-noise measurement is a development reference for the
+current filter configuration at a 250 Hz sampling rate with 50 Hz mains-noise
+removal. The planned live interface should present the same two relationships:
+raw versus filtered PSD and attenuation by frequency.
+
+![Current filter frequency-response reference](docs/diagrams/current-filter-frequency-response.png)
 
 ---
 
@@ -182,3 +208,4 @@ distributed under the
 7. Add timer and countdown visualizations.
 8. Move signal processing from the GUI thread to a dedicated processing thread.
 9. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.
+10. Implement the [live ModernGL frequency-domain view](#23-planned-live-frequency-domain-view).

@@ -4,9 +4,14 @@ from PyQt5.QtGui import QSurfaceFormat
 from PyQt5.QtWidgets import QOpenGLWidget
 from typing_extensions import override
 
-from emg_gui.config.constants import (EDGE_ARTIFACT_BUFFER, MAJOR_PIXEL_TICKS,
-                                      MINOR_PIXEL_TICKS, SPECTROGRAM_WINDOW,
-                                      TEXT_PIXEL_TICKS, TIME_WINDOW_SAMPLES)
+from emg_gui.config.constants import (
+    EDGE_ARTIFACT_BUFFER,
+    MAJOR_PIXEL_TICKS,
+    MINOR_PIXEL_TICKS,
+    SPECTROGRAM_WINDOW,
+    TEXT_PIXEL_TICKS,
+    TIME_WINDOW_SAMPLES,
+)
 from emg_gui.core.enums import MainsFrequency
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
@@ -22,7 +27,11 @@ class EMGOpenGLWidget(QOpenGLWidget):
     frame_rendered = pyqtSignal()
 
     def __init__(
-        self, logger: Logger, number_of_emg_channels: int, sampling_rate: int, mains_frequency: MainsFrequency
+        self,
+        logger: Logger,
+        number_of_emg_channels: int,
+        sampling_rate: int,
+        mains_frequency: MainsFrequency,
     ) -> None:
         super().__init__()
 
@@ -118,7 +127,11 @@ class EMGOpenGLWidget(QOpenGLWidget):
             return
         filter_snapshot = raw_snapshot.copy()
         for count in range(self._number_of_emg_channels):
-            filter_data(time_series=filter_snapshot[count, :], sampling_rate=self._sampling_rate, noise_type=self._noise_type)
+            filter_data(
+                time_series=filter_snapshot[count, :],
+                sampling_rate=self._sampling_rate,
+                noise_type=self._noise_type,
+            )
         self._reference_to_raw_snapshot = raw_snapshot[:, EDGE_ARTIFACT_BUFFER:]
         self._reference_to_filtered_snapshot = filter_snapshot[:, EDGE_ARTIFACT_BUFFER:]
         self._last_snapshot_received = raw_snapshot
@@ -133,5 +146,4 @@ class EMGOpenGLWidget(QOpenGLWidget):
         self._text.release()
         self._modern_gl_context.release()
         self._logger.info("OpenGL: Released openGL context")
-        self.doneCurrent()
         self.doneCurrent()

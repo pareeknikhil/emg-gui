@@ -17,7 +17,7 @@ from emg_gui.core.types import EMGArray
 
 
 @dataclass(frozen=True)
-class OpenBCIConfig():
+class OpenBCIConfig:
     board_type: OpenBCIBoardType
     polling_interval_ms: int = 40
     turn_off_srb: bool = False
@@ -32,7 +32,7 @@ class OpenBCIConfig():
 
 
 @dataclass(frozen=True)
-class PlayBackConfig():
+class PlayBackConfig:
     board_type: OpenBCIBoardType
     file_path: str = ""
     polling_interval_ms: int = 40
@@ -79,6 +79,7 @@ class DataSource(Protocol):
 
     @property
     def polling_interval_ms(self) -> int: ...
+
 
 class OpenBCIBoard:
 
@@ -145,9 +146,7 @@ class OpenBCIBoard:
 
         if self._board.is_prepared():
             self._board.start_stream()
-            self._logger.info(
-                f"DATASOURCE: Streaming Data...)"
-            )
+            self._logger.info("DATASOURCE: Streaming Data...)")
         else:
             self._logger.error("DATASOURCE: Unable to connect with OpenBCI board")
             raise RuntimeError("DATASOURCE: Unable to connect with OpenBCI board")
@@ -260,6 +259,7 @@ class OpenBCIBoard:
             board_response = board.config_board(f"x{channel}060100X")[:1]
             if board_response not in {"S", "C"}:
                 sys.exit(1)
+
 
 class PlaybackRecording:
 
@@ -395,5 +395,4 @@ class PlaybackRecording:
 
     @property
     def is_active(self) -> bool:
-        return self._activity_state is ActivityState.ACTIVE
         return self._activity_state is ActivityState.ACTIVE

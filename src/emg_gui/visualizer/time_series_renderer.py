@@ -6,7 +6,9 @@ from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
 from emg_gui.processing.window_functions import orthographic
 from emg_gui.visualizer.shaders.shader_loader import (
-    time_series_fragment_shader, time_series_vertex_shader)
+    time_series_fragment_shader,
+    time_series_vertex_shader,
+)
 
 
 class TimeSeriesRenderer:

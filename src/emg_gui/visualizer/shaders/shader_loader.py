@@ -3,9 +3,7 @@ from importlib.resources import files
 
 def _load_shader_file(*paths: str) -> str:
     return (
-        files("emg_gui.visualizer.shaders")
-        .joinpath(*paths)
-        .read_text(encoding="utf-8")
+        files("emg_gui.visualizer.shaders").joinpath(*paths).read_text(encoding="utf-8")
     )
 
 

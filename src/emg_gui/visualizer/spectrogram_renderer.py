@@ -6,8 +6,10 @@ import numpy as np
 from emg_gui.config.constants import SPECTROGRAM_WINDOW, TIME_WINDOW_SAMPLES
 from emg_gui.core.logger import Logger
 from emg_gui.processing.window_functions import get_hann_window, orthographic
-from emg_gui.visualizer.shaders.shader_loader import (spec_fragment_shader,
-                                                      spec_vertex_shader)
+from emg_gui.visualizer.shaders.shader_loader import (
+    spec_fragment_shader,
+    spec_vertex_shader,
+)
 
 
 class SpectrogramRenderer:

@@ -11,7 +11,9 @@ from emg_gui.visualizer.open_gl_widget import EMGOpenGLWidget
 
 class EMGVisualizerWindow(QMainWindow):
 
-    def __init__(self, logger: Logger, board: DataSource, mains_frequency: MainsFrequency) -> None:
+    def __init__(
+        self, logger: Logger, board: DataSource, mains_frequency: MainsFrequency
+    ) -> None:
         super().__init__()
 
         self._logger = logger
@@ -22,7 +24,10 @@ class EMGVisualizerWindow(QMainWindow):
         self._control_section = EMGControlPanel()
 
         self._open_gl_widget = EMGOpenGLWidget(
-            logger=self._logger, number_of_emg_channels=board.emg_channel_count, sampling_rate=board.sampling_rate, mains_frequency=mains_frequency
+            logger=self._logger,
+            number_of_emg_channels=board.emg_channel_count,
+            sampling_rate=board.sampling_rate,
+            mains_frequency=mains_frequency,
         )
 
         main_layout = QHBoxLayout()
@@ -88,7 +93,9 @@ class EMGVisualizerWindow(QMainWindow):
         super().closeEvent(a0)
 
     @classmethod
-    def run(cls, logger: Logger, board: DataSource, mains_frequency: MainsFrequency) -> None:
+    def run(
+        cls, logger: Logger, board: DataSource, mains_frequency: MainsFrequency
+    ) -> None:
         QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
         qt_app = QApplication([])
         window = cls(logger, board, mains_frequency)
