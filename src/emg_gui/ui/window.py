@@ -19,7 +19,6 @@ class EMGVisualizerWindow(QMainWindow):
         self._logger = logger
 
         self.setWindowTitle("emg-gui")
-        self.showMaximized()
 
         self._control_section = EMGControlPanel()
 
@@ -37,6 +36,8 @@ class EMGVisualizerWindow(QMainWindow):
         widget = QWidget()
         widget.setLayout(main_layout)
         self.setCentralWidget(widget)
+
+        self.showMaximized()
 
         self._sensor_thread = QThread()
         self._sensor_worker = SensorWorker(self._logger, board)
