@@ -4,9 +4,14 @@ from PyQt5.QtGui import QSurfaceFormat
 from PyQt5.QtWidgets import QOpenGLWidget
 from typing_extensions import override
 
-from emg_gui.config.constants import (EDGE_ARTIFACT_BUFFER, MAJOR_PIXEL_TICKS,
-                                      MINOR_PIXEL_TICKS, SPECTROGRAM_WINDOW,
-                                      TEXT_PIXEL_TICKS, TIME_WINDOW_SAMPLES)
+from emg_gui.config.constants import (
+    EDGE_ARTIFACT_BUFFER,
+    MAJOR_PIXEL_TICKS,
+    MINOR_PIXEL_TICKS,
+    SPECTROGRAM_WINDOW,
+    TEXT_PIXEL_TICKS,
+    TIME_WINDOW_SAMPLES,
+)
 from emg_gui.core.enums import MainsFrequency
 from emg_gui.core.logger import Logger
 from emg_gui.core.types import EMGArray
