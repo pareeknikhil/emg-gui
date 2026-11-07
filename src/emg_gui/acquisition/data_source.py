@@ -218,12 +218,10 @@ class OpenBCIBoard:
 
     def write_to_csv(self, datasplit: str, folder: str) -> None:
         emg_numpy = np.concatenate(self._emg_recording, axis=1)
-        file_path = (
-            f"data/csv/{datasplit}/{folder}/{str(int(time.time()))}__{folder}.csv"
-        )
+        file_path = f"data/{datasplit}/{folder}/{str(int(time.time()))}__{folder}.csv"
         DataFilter.write_file(data=emg_numpy, file_name=file_path, file_mode="w")
         file_ds = get_all_files(
-            pattern=f"data/csv/{datasplit}/{folder}/*.csv", shuffle_flag=False
+            pattern=f"data/{datasplit}/{folder}/*.csv", shuffle_flag=False
         )  # hard-coded: [TECH DEBT]
         self._logger.info(
             f"DATASOURCE: File written @ {file_path} (Total files: {sum(1 for _ in file_ds)})"
