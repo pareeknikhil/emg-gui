@@ -1,3 +1,5 @@
+from typing import Optional
+
 import moderngl
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QSurfaceFormat
@@ -49,9 +51,9 @@ class EMGOpenGLWidget(QOpenGLWidget):
 
         self._window_duration_sec = TIME_WINDOW_SAMPLES / sampling_rate
 
-        self._reference_to_raw_snapshot: EMGArray | None = None
-        self._reference_to_filtered_snapshot: EMGArray | None = None
-        self._last_snapshot_received: EMGArray | None = None
+        self._reference_to_raw_snapshot: Optional[EMGArray] = None
+        self._reference_to_filtered_snapshot: Optional[EMGArray] = None
+        self._last_snapshot_received: Optional[EMGArray] = None
 
     @override
     def initializeGL(self) -> None:

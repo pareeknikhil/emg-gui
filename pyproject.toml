@@ -9,9 +9,12 @@ maintainers = [
     {name = "Nikhil Pareek", email = "nikhilpareek149@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12,<3.15"
+requires-python = ">=3.9,<3.15"
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
@@ -53,5 +56,5 @@ include = [
 
 [dependency-groups]
 dev = [
-    "types-pyserial (>=3.5.0.20260712,<4.0.0.0)"
+    "types-pyserial (>=3.5.0.20260712,<4.0.0.0); python_version >= '3.10'"
 ]

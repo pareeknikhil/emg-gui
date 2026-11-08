@@ -2,9 +2,12 @@ from importlib.resources import files
 
 
 def _load_shader_file(*paths: str) -> str:
-    return (
-        files("emg_gui.visualizer.shaders").joinpath(*paths).read_text(encoding="utf-8")
-    )
+    shader_path = files("emg_gui.visualizer.shaders")
+
+    for path in paths:
+        shader_path = shader_path.joinpath(path)
+
+    return shader_path.read_text(encoding="utf-8")
 
 
 time_series_vertex_shader = _load_shader_file("time_series", "vertex.glsl")
