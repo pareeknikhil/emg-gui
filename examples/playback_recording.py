@@ -16,9 +16,7 @@ def main() -> None:
     # To play your own recording, replace the packaged example below with the
     # path to your CSV file, for example:
     # playback_file_location = "/home/user/recordings/session.csv"
-    playback_file_location = (
-        files("emg_gui.data") / "train" / "top_fist" / "file_1.csv"
-    )
+    playback_file_location = files("emg_gui.data") / "train" / "top_fist" / "file_1.csv"
     playback_config = PlayBackConfig(
         board_type=OpenBCIBoardType.SYNTHETIC,
         file_path=str(playback_file_location),
