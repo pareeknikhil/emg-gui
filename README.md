@@ -120,7 +120,7 @@ Run it with Python, then click **Stream Data** to begin. Close the window to exi
 - [Recording and markers](#recording-and-markers): save signals and label movement intervals.
 - [API reference](#api-reference): methods and properties for use in your own code.
 
-#### Synthetic data
+### Synthetic data
 
 [Source: examples/synthetic_board.py](examples/synthetic_board.py)
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     main()
 ```
 
-#### OpenBCI Cyton
+### OpenBCI Cyton
 
 [Source: examples/cyton_board.py](examples/cyton_board.py)
 
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     main()
 ```
 
-#### Playback
+### Playback
 
 [Source: examples/playback_recording.py](examples/playback_recording.py)
 
@@ -236,7 +236,7 @@ in the marker column when there are no markers. Relative paths resolve from
 your working directory. Playback outputs zeros after the last sample; stop and
 restart streaming to replay from the beginning.
 
-#### Configuration
+### Configuration
 
 `OpenBCIConfig` and `PlayBackConfig` are immutable. Create a new configuration
 and data-source instance to change their settings.
@@ -285,7 +285,7 @@ Use the enum members, not the numbers `50` or `60`. This call creates the Qt
 application and blocks until the window closes. Run it on the main thread;
 release the board and logger afterwards, as shown above.
 
-#### Recording and markers
+### Recording and markers
 
 For a live or synthetic board:
 
@@ -310,7 +310,7 @@ not the filtered display traces. **Reset** clears the display buffer.
 Playback supports viewing existing recordings; recording and saving during
 playback are not implemented.
 
-#### API reference
+### API reference
 
 The GUI handles these operations for you. Use them directly when acquiring
 data without the window; avoid concurrent reads while the GUI is streaming.
