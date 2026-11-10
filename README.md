@@ -19,7 +19,7 @@ ModernGL. It displays raw and filtered EMG traces from OpenBCI boards alongside
 a live spectrogram, with support for recording and playback.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/pareeknikhil/emg-gui/main/docs/diagrams/emg.webp" alt="EMG-GUI displaying raw and filtered EMG traces alongside a live spectrogram" width="900">
+  <img src="https://raw.githubusercontent.com/pareeknikhil/emg-gui/main/docs/diagrams/emg-preview.webp" alt="EMG-GUI displaying raw and filtered EMG traces alongside a live spectrogram" width="900">
 </p>
 
 ## Contents
