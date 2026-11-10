@@ -18,13 +18,15 @@ EMG-GUI is a multithreaded [Python package](https://pypi.org/project/emg-gui/) b
 ModernGL. It displays raw and filtered EMG traces from OpenBCI boards alongside
 a live spectrogram, with support for recording and playback.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/pareeknikhil/emg-gui/main/docs/diagrams/emg.webp" alt="EMG-GUI displaying raw and filtered EMG traces alongside a live spectrogram" width="900">
+</p>
+
 ## Contents
 
 - [Installation](#1-installation)
 - [Practical Examples](#2-practical-examples)
 - [Configuration](#configuration)
-- [Recording and Markers](#recording-and-markers)
-- [API Reference](#api-reference)
 - [Architecture](#3-architecture)
 - [Contributing](#4-contributing)
 - [Planned Features](CONTRIBUTING.md#planned-features)
@@ -47,10 +49,6 @@ Choose your operating system and follow the steps in order.
    pip install emg-gui
    ```
 
-2. **Serial OpenBCI boards only — set `serial_port` in your script's `OpenBCIConfig`.**
-   Use the board's `/dev/cu.*` device path. BrainFlow does not support
-   `/dev/tty.*` device paths on macOS.
-
 </details>
 
 <details>
@@ -61,9 +59,6 @@ Choose your operating system and follow the steps in order.
    ```powershell
    pip install emg-gui
    ```
-
-2. **Serial OpenBCI boards only — set `serial_port` in your script's `OpenBCIConfig`.**
-   Use the board's assigned port name, such as `COM3`.
 
 </details>
 
@@ -90,17 +85,6 @@ Choose your operating system and follow the steps in order.
    pip install emg-gui
    ```
 
-3. **Serial OpenBCI boards only — configure port access.** Debian and
-   Ubuntu users can join the `dialout` group, then sign out and back in for the
-   change to take effect:
-
-   ```bash
-   sudo usermod -aG dialout "$USER"
-   ```
-
-   Set `serial_port` in your `OpenBCIConfig` in your script to the board's device
-   path, such as `/dev/ttyUSB0` or `/dev/ttyACM0`.
-
 </details>
 
 <br>
@@ -117,8 +101,6 @@ Run it with Python, then click **Stream Data** to begin. Close the window to exi
 - [OpenBCI Cyton](#openbci-cyton): connect a serial board.
 - [Playback](#playback): view a bundled or personal recording.
 - [Configuration](#configuration): board types, connection options, and mains frequency.
-- [Recording and markers](#recording-and-markers): save signals and label movement intervals.
-- [API reference](#api-reference): methods and properties for use in your own code.
 
 ### Synthetic data
 
@@ -154,8 +136,16 @@ if __name__ == "__main__":
 
 [Source: examples/cyton_board.py](examples/cyton_board.py)
 
-Set `serial_port` to your board's port: for example, `/dev/ttyUSB0` on Linux,
-`/dev/cu.usbserial-…` on macOS, or `COM3` on Windows. Ports are not detected automatically.
+Set `serial_port` in the example below to your board's port:
+
+- **macOS:** use `/dev/cu.*`, such as `/dev/cu.usbserial-…`.
+- **Windows:** use the assigned COM port, such as `COM3`.
+- **Ubuntu / Debian:** use `/dev/ttyUSB0` or `/dev/ttyACM0`. To grant serial-port
+  access, run the following, then sign out and back in:
+
+  ```bash
+  sudo usermod -aG dialout "$USER"
+  ```
 
 ```python
 from emg_gui import (
@@ -285,67 +275,6 @@ Use the enum members, not the numbers `50` or `60`. This call creates the Qt
 application and blocks until the window closes. Run it on the main thread;
 release the board and logger afterwards, as shown above.
 
-### Recording and markers
-
-For a live or synthetic board:
-
-1. Click **Stream Data**, then choose a dataset split and label in the dropdowns.
-2. Click **Record** to begin collecting raw EMG and marker samples.
-3. Click **Start Movement** and **Stop Movement** to mark an activity interval.
-4. Click **Recording** to stop and save, before stopping the stream or closing the window.
-
-Files are saved relative to your working directory as
-`data/<split>/<label>/<timestamp>__<label>.csv`. Create the destination directory
-before saving; for example, for split `train` and label `top_fist`:
-
-```python
-from pathlib import Path
-
-Path("data/train/top_fist").mkdir(parents=True, exist_ok=True)
-```
-
-Splits are `train`, `validate`, and `test`; label choices come from the bundled
-dataset folders. Saved files contain raw signals and a final marker column,
-not the filtered display traces. **Reset** clears the display buffer.
-Playback supports viewing existing recordings; recording and saving during
-playback are not implemented.
-
-### API reference
-
-The GUI handles these operations for you. Use them directly when acquiring
-data without the window; avoid concurrent reads while the GUI is streaming.
-
-| Method on `board`                                | Behavior                                                                                                                                |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `start_stream()` / `stop_stream()`               | Start/stop acquisition or playback. Repeating the current state raises `RuntimeError`.                                                  |
-| `get_data()`                                     | Return a NumPy array shaped `(EMG channels + 1, samples)`, with markers in the last row. Live reads consume available buffered samples. |
-| `extract_emg_data(data)`                         | Return only the EMG rows.                                                                                                               |
-| `start_recording()` / `stop_recording()`         | Enable/disable accumulation; these calls do not read samples or save a file.                                                            |
-| `record(data)`                                   | Append a `get_data()` batch while recording is enabled. Call this on each read when working without the GUI.                            |
-| `insert_start_marker()` / `insert_stop_marker()` | Mark movement start/end with `1.12345` / `2.12345`.                                                                                     |
-| `write_to_csv(datasplit, folder)`                | Save accumulated batches to the directory described above and clear them. Requires collected data and an existing directory.            |
-| `release()`                                      | Stop a live stream and release its board session.                                                                                       |
-
-Recording and movement methods also raise `RuntimeError` on repeated
-start/stop transitions. On `PlaybackRecording`, `record()`, `write_to_csv()`,
-and `release()` do nothing; movement methods change state without editing file markers.
-
-| Read-only property    | Meaning                                               |
-| --------------------- | ----------------------------------------------------- |
-| `emg_channel_count`   | Number of EMG channels, excluding the marker channel. |
-| `sampling_rate`       | Board sampling rate in Hz.                            |
-| `polling_interval_ms` | Configured interval between reads.                    |
-| `is_streaming`        | Whether acquisition/playback is started.              |
-| `is_recording`        | Whether recording is enabled.                         |
-| `is_active`           | Whether a movement interval is active.                |
-
-`ConsoleLogger()` provides `info(message)`, `error(message)`, and `release()`.
-You may pass your own logger with these three methods. A custom data source
-must provide the methods and properties listed above; see the
-[DataSource contract](src/emg_gui/acquisition/data_source.py).
-
----
-
 ## 3. Architecture
 
 See the [architecture guide](docs/architecture.md) for the component overview,
@@ -366,7 +295,7 @@ operating system, Python and package versions, and the full error output.
 
 ## 5. Acknowledgements
 
-### 4.1 BrainFlow
+### 5.1 BrainFlow
 
 This project uses [BrainFlow](https://brainflow.readthedocs.io/en/stable/) for
 biosignal acquisition and hardware integration. BrainFlow provides a uniform
@@ -375,7 +304,7 @@ data across a wide range of supported boards, including OpenBCI devices.
 BrainFlow is distributed under the
 [MIT License](https://github.com/brainflow-dev/brainflow/blob/master/LICENSE).
 
-### 4.2 ModernGL Spectrogram
+### 5.2 ModernGL Spectrogram
 
 This project uses
 [nickcercone/spectrogram](https://github.com/nickcercone/spectrogram) as a
@@ -384,7 +313,7 @@ referenced project demonstrates real-time audio spectrogram visualization
 using ModernGL and is distributed under the
 [MIT License](https://github.com/nickcercone/spectrogram/blob/main/LICENCE).
 
-### 4.3 Text Rendering
+### 5.3 Text Rendering
 
 This project adapts the code in
 [How to render text with PyOpenGL?](https://stackoverflow.com/questions/63836707/how-to-render-text-with-pyopengl)
