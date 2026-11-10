@@ -11,162 +11,360 @@
 </h1>
 
 <p align="center">
-  <em>A high-performance, multithreaded, real-time visualization engine for acquiring, recording, and exploring raw and filtered EMG signals from OpenBCI boards.</em>
+  <em>Real-time acquisition and visualization of OpenBCI EMG signals with Python.</em>
 </p>
 
-## 1. Overview
+EMG-GUI is a multithreaded [Python package](https://pypi.org/project/emg-gui/) built with BrainFlow, Qt, and
+ModernGL. It displays raw and filtered EMG traces from OpenBCI boards alongside
+a live spectrogram, with support for recording and playback.
 
-### 1.1 Installation
+## Contents
 
-EMG-GUI can be installed from pypi using pip:
+- [Installation](#1-installation)
+- [Practical Examples](#2-practical-examples)
+- [Configuration](#configuration)
+- [Recording and Markers](#recording-and-markers)
+- [API Reference](#api-reference)
+- [Architecture](#3-architecture)
+- [Contributing](#4-contributing)
+- [Planned Features](CONTRIBUTING.md#planned-features)
+- [Tech Debt](CONTRIBUTING.md#5-tech-debt)
+- [Acknowledgements](#5-acknowledgements)
+- [Videos](#videos)
 
-```bash
-pip install emg-gui
+## 1. Installation
+
+**Requirement:** Python 3.9, 3.10, 3.11, 3.12, 3.13, or 3.14.
+
+Choose your operating system and follow the steps in order.
+
+<details>
+<summary><strong>🍎 macOS</strong></summary>
+
+1. **Install EMG-GUI:**
+
+   ```bash
+   pip install emg-gui
+   ```
+
+2. **Serial OpenBCI boards only — set `serial_port` in your script's `OpenBCIConfig`.**
+   Use the board's `/dev/cu.*` device path. BrainFlow does not support
+   `/dev/tty.*` device paths on macOS.
+
+</details>
+
+<details>
+<summary><strong>🪟 Windows</strong></summary>
+
+1. **Install EMG-GUI in PowerShell:**
+
+   ```powershell
+   pip install emg-gui
+   ```
+
+2. **Serial OpenBCI boards only — set `serial_port` in your script's `OpenBCIConfig`.**
+   Use the board's assigned port name, such as `COM3`.
+
+</details>
+
+<details open>
+<summary><strong>🐧 Linux — Ubuntu / Debian</strong></summary>
+
+1. **Install the system dependencies.** For Debian and Ubuntu:
+
+   ```bash
+   sudo apt update
+   sudo apt install \
+     libgl-dev \
+     libegl-dev \
+     libxcb-icccm4 \
+     libxcb-keysyms1 \
+     libxcb-xinerama0 \
+     libxcb-xkb1 \
+     libxkbcommon-x11-0
+   ```
+
+2. **Install EMG-GUI:**
+
+   ```bash
+   pip install emg-gui
+   ```
+
+3. **Serial OpenBCI boards only — configure port access.** Debian and
+   Ubuntu users can join the `dialout` group, then sign out and back in for the
+   change to take effect:
+
+   ```bash
+   sudo usermod -aG dialout "$USER"
+   ```
+
+   Set `serial_port` in your `OpenBCIConfig` in your script to the board's device
+   path, such as `/dev/ttyUSB0` or `/dev/ttyACM0`.
+
+</details>
+
+<br>
+
+> **Graphics troubleshooting:** If the application reports an OpenGL context
+> error, check that your graphics driver provides OpenGL 3.3 or later.
+
+## 2. Practical Examples
+
+Each script opens raw and filtered EMG traces alongside a live spectrogram.
+Run it with Python, then click **Stream Data** to begin. Close the window to exit.
+
+- [Synthetic data](#synthetic-data): try the interface without hardware.
+- [OpenBCI Cyton](#openbci-cyton): connect a serial board.
+- [Playback](#playback): view a bundled or personal recording.
+- [Configuration](#configuration): board types, connection options, and mains frequency.
+- [Recording and markers](#recording-and-markers): save signals and label movement intervals.
+- [API reference](#api-reference): methods and properties for use in your own code.
+
+### Synthetic data
+
+[Source: examples/synthetic_board.py](examples/synthetic_board.py)
+
+```python
+from emg_gui import (
+    ConsoleLogger, EMGVisualizerWindow, MainsFrequency,
+    OpenBCIBoard, OpenBCIBoardType, OpenBCIConfig,
+)
+
+
+def main():
+    logger = ConsoleLogger()
+    board = None
+    try:
+        config = OpenBCIConfig(board_type=OpenBCIBoardType.SYNTHETIC)
+        board = OpenBCIBoard(logger=logger, config=config)
+        EMGVisualizerWindow.run(
+            logger=logger, board=board, mains_frequency=MainsFrequency.FIFTY_HZ
+        )
+    finally:
+        if board is not None:
+            board.release()
+        logger.release()
+
+
+if __name__ == "__main__":
+    main()
 ```
 
-### 1.2 How to Run
+### OpenBCI Cyton
 
-TODO
+[Source: examples/cyton_board.py](examples/cyton_board.py)
+
+Set `serial_port` to your board's port: for example, `/dev/ttyUSB0` on Linux,
+`/dev/cu.usbserial-…` on macOS, or `COM3` on Windows. Ports are not detected automatically.
+
+```python
+from emg_gui import (
+    ConsoleLogger, EMGVisualizerWindow, MainsFrequency,
+    OpenBCIBoard, OpenBCIBoardType, OpenBCIConfig,
+)
+
+
+def main():
+    logger = ConsoleLogger()
+    board = None
+    try:
+        config = OpenBCIConfig(
+            board_type=OpenBCIBoardType.CYTON_SERIAL,
+            serial_port="/dev/ttyUSB0",
+            polling_interval_ms=40,
+            turn_off_srb=True,
+        )
+        board = OpenBCIBoard(logger=logger, config=config)
+        EMGVisualizerWindow.run(
+            logger=logger, board=board, mains_frequency=MainsFrequency.FIFTY_HZ
+        )
+    finally:
+        if board is not None:
+            board.release()
+        logger.release()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Playback
+
+[Source: examples/playback_recording.py](examples/playback_recording.py)
+
+No board connection is needed. Set `board_type` to the board used for the
+recording; it determines the playback sampling rate. The bundled example uses `SYNTHETIC`.
+
+```python
+from importlib.resources import files
+
+from emg_gui import (
+    ConsoleLogger, EMGVisualizerWindow, MainsFrequency,
+    OpenBCIBoardType, PlayBackConfig, PlaybackRecording,
+)
+
+
+def main():
+    logger = ConsoleLogger()
+    board = None
+    try:
+        recording = files("emg_gui.data") / "train" / "top_fist" / "file_1.csv"
+        # For your own recording, use its path instead:
+        # recording = "/home/user/recordings/session.csv"
+        config = PlayBackConfig(
+            board_type=OpenBCIBoardType.SYNTHETIC,
+            file_path=str(recording),
+            polling_interval_ms=40,
+        )
+        board = PlaybackRecording(logger=logger, config=config)
+        EMGVisualizerWindow.run(
+            logger=logger, board=board, mains_frequency=MainsFrequency.FIFTY_HZ
+        )
+    finally:
+        if board is not None:
+            board.release()
+        logger.release()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+**File format:** numeric, tab-separated rows without a header. Each row is one
+sample; columns contain EMG channels followed by one marker column. Use zeros
+in the marker column when there are no markers. Relative paths resolve from
+your working directory. Playback outputs zeros after the last sample; stop and
+restart streaming to replay from the beginning.
+
+### Configuration
+
+`OpenBCIConfig` and `PlayBackConfig` are immutable. Create a new configuration
+and data-source instance to change their settings.
+
+**`OpenBCIConfig`**
+
+| Parameter                      | Default  | Purpose                                                                                                 |
+| ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------- |
+| `board_type: OpenBCIBoardType` | Required | Select the board and its sampling rate/channel layout.                                                  |
+| `polling_interval_ms: int`     | `40`     | Interval between data reads; does not change the board's sampling rate.                                 |
+| `turn_off_srb: bool`           | `False`  | Send SRB-disabling channel commands for a compatible Cyton setup. Leave disabled for other board types. |
+| `serial_port: str`             | `""`     | Serial device path or COM port.                                                                         |
+| `ip_address: str`              | `""`     | Board/network address.                                                                                  |
+| `ip_port: int`                 | `0`      | Network port.                                                                                           |
+| `ip_protocol: int`             | `0`      | BrainFlow IP protocol value.                                                                            |
+| `mac_address: str`             | `""`     | Device MAC address, when required.                                                                      |
+| `serial_number: str`           | `""`     | Device serial number, when required.                                                                    |
+| `timeout: int`                 | `0`      | BrainFlow discovery/connection timeout.                                                                 |
+| `other_info: str`              | `""`     | Additional board-specific connection information.                                                       |
+
+Connection fields are passed directly to BrainFlow. Supply the fields required
+by your board's [connection instructions](https://brainflow.readthedocs.io/en/stable/SupportedBoards.html).
+
+**`OpenBCIBoardType`**
+
+| Connection       | Enum members                                            |
+| ---------------- | ------------------------------------------------------- |
+| Serial / dongle  | `CYTON_SERIAL`, `CYTON_DAISY_SERIAL`, `GANGLION_DONGLE` |
+| Native Bluetooth | `GANGLION_NATIVE`                                       |
+| Wi-Fi            | `CYTON_WIFI`, `CYTON_DAISY_WIFI`, `GANGLION_WIFI`       |
+| Generated data   | `SYNTHETIC`                                             |
+
+**`PlayBackConfig`**
+
+| Parameter                      | Default  | Purpose                                                                    |
+| ------------------------------ | -------- | -------------------------------------------------------------------------- |
+| `board_type: OpenBCIBoardType` | Required | Board whose sampling rate matches the recording.                           |
+| `file_path: str`               | `""`     | Path to the recording; supply an existing file.                            |
+| `polling_interval_ms: int`     | `40`     | Playback read interval; samples per read follow the board's sampling rate. |
+
+**`EMGVisualizerWindow.run(logger, board, mains_frequency)`**
+
+Pass a `ConsoleLogger`, an `OpenBCIBoard` or `PlaybackRecording`, and either
+`MainsFrequency.FIFTY_HZ` or `MainsFrequency.SIXTY_HZ` for mains-noise removal.
+Use the enum members, not the numbers `50` or `60`. This call creates the Qt
+application and blocks until the window closes. Run it on the main thread;
+release the board and logger afterwards, as shown above.
+
+### Recording and markers
+
+For a live or synthetic board:
+
+1. Click **Stream Data**, then choose a dataset split and label in the dropdowns.
+2. Click **Record** to begin collecting raw EMG and marker samples.
+3. Click **Start Movement** and **Stop Movement** to mark an activity interval.
+4. Click **Recording** to stop and save, before stopping the stream or closing the window.
+
+Files are saved relative to your working directory as
+`data/<split>/<label>/<timestamp>__<label>.csv`. Create the destination directory
+before saving; for example, for split `train` and label `top_fist`:
+
+```python
+from pathlib import Path
+
+Path("data/train/top_fist").mkdir(parents=True, exist_ok=True)
+```
+
+Splits are `train`, `validate`, and `test`; label choices come from the bundled
+dataset folders. Saved files contain raw signals and a final marker column,
+not the filtered display traces. **Reset** clears the display buffer.
+Playback supports viewing existing recordings; recording and saving during
+playback are not implemented.
+
+### API reference
+
+The GUI handles these operations for you. Use them directly when acquiring
+data without the window; avoid concurrent reads while the GUI is streaming.
+
+| Method on `board`                                | Behavior                                                                                                                                |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `start_stream()` / `stop_stream()`               | Start/stop acquisition or playback. Repeating the current state raises `RuntimeError`.                                                  |
+| `get_data()`                                     | Return a NumPy array shaped `(EMG channels + 1, samples)`, with markers in the last row. Live reads consume available buffered samples. |
+| `extract_emg_data(data)`                         | Return only the EMG rows.                                                                                                               |
+| `start_recording()` / `stop_recording()`         | Enable/disable accumulation; these calls do not read samples or save a file.                                                            |
+| `record(data)`                                   | Append a `get_data()` batch while recording is enabled. Call this on each read when working without the GUI.                            |
+| `insert_start_marker()` / `insert_stop_marker()` | Mark movement start/end with `1.12345` / `2.12345`.                                                                                     |
+| `write_to_csv(datasplit, folder)`                | Save accumulated batches to the directory described above and clear them. Requires collected data and an existing directory.            |
+| `release()`                                      | Stop a live stream and release its board session.                                                                                       |
+
+Recording and movement methods also raise `RuntimeError` on repeated
+start/stop transitions. On `PlaybackRecording`, `record()`, `write_to_csv()`,
+and `release()` do nothing; movement methods change state without editing file markers.
+
+| Read-only property    | Meaning                                               |
+| --------------------- | ----------------------------------------------------- |
+| `emg_channel_count`   | Number of EMG channels, excluding the marker channel. |
+| `sampling_rate`       | Board sampling rate in Hz.                            |
+| `polling_interval_ms` | Configured interval between reads.                    |
+| `is_streaming`        | Whether acquisition/playback is started.              |
+| `is_recording`        | Whether recording is enabled.                         |
+| `is_active`           | Whether a movement interval is active.                |
+
+`ConsoleLogger()` provides `info(message)`, `error(message)`, and `release()`.
+You may pass your own logger with these three methods. A custom data source
+must provide the methods and properties listed above; see the
+[DataSource contract](src/emg_gui/acquisition/data_source.py).
 
 ---
 
-## 2. Architecture and Project Structure
+## 3. Architecture
 
-### 2.1 Architecture
+See the [architecture guide](docs/architecture.md) for the component overview,
+[directory layout](docs/architecture.md#directory-layout), data flow, and thread
+interactions.
 
-The application separates sensor acquisition, interface controls, signal
-processing, and GPU rendering. Sensor polling and board stream control run on a
-dedicated thread, while Qt interface updates, filtering, and ModernGL rendering
-currently run on the main thread.
+## 4. Contributing
 
-```text
-EMG GUI
-├── app.py
-├── Acquisition
-│   ├── DataSource
-│   └── SensorWorker
-│       └── RingBuffer
-├── UI
-│   ├── EMGVisualizerWindow
-│   └── EMGControlPanel
-├── Processing
-│   ├── EMG filtering
-│   └── Window functions
-└── Visualization
-    ├── EMGOpenGLWidget
-    ├── TimeSeriesRenderer
-    ├── SpectrogramRenderer
-    ├── TicksRenderer
-    └── TextRenderer
-```
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the development and linting workflow,
+[planned features](CONTRIBUTING.md#planned-features), and
+[tech debt](CONTRIBUTING.md#5-tech-debt).
 
-The `DataSource` provides hardware-independent acquisition from either an
-OpenBCI board or a playback recording. The current application entry point uses
-`OpenBCIBoard` by default, with playback available as an alternate source.
-`SensorWorker` reads EMG samples into a fixed-size ring buffer, and
-`EMGOpenGLWidget` owns duplicate-snapshot checks, snapshot filtering, and
-ModernGL rendering. `TimeSeriesRenderer` and `SpectrogramRenderer` are connected
-to the live rendering path. Channel counts come from the selected data source,
-so synthetic and real boards can expose different numbers of EMG channels. The
-display window is sample-based, while the rendered layout is derived from the
-OpenGL widget size and the selected EMG channel count.
-
-See the [architecture guide](docs/architecture.md) for the detailed component
-hierarchy, data flow, and thread interaction sequences.
-
-### 2.2 Directory Layout
-
-Inside this project, you'll see the following folders and files:
-
-```text
-/
-├── docs/
-│   ├── diagrams/
-│   │   ├── Ability_Logo.svg
-│   │   ├── current-filter-frequency-response.png
-│   │   └── interface-contracts.svg
-│   └── architecture.md
-├── src/
-│   └── emg_gui/
-│       ├── app.py
-│       ├── acquisition/
-│       │   ├── data_source.py
-│       │   ├── dataset_files.py
-│       │   └── sensor_worker.py
-│       ├── config/
-│       │   ├── constants.py
-│       │   └── Roboto-Black.ttf
-│       ├── core/
-│       │   ├── enums.py
-│       │   ├── logger.py
-│       │   └── types.py
-│       ├── processing/
-│       │   ├── filter.py
-│       │   └── window_functions.py
-│       ├── ui/
-│       │   ├── control_panel.py
-│       │   └── window.py
-│       └── visualizer/
-│           ├── shaders/
-│           │   ├── shader_loader.py
-│           │   ├── spec/
-│           │   │   ├── vertex.glsl
-│           │   │   └── fragment.glsl
-│           │   ├── text/
-│           │   │   ├── vertex.glsl
-│           │   │   └── fragment.glsl
-│           │   ├── ticks/
-│           │   │   ├── vertex.glsl
-│           │   │   └── fragment.glsl
-│           │   └── time_series/
-│           │       ├── vertex.glsl
-│           │       └── fragment.glsl
-│           ├── open_gl_widget.py
-│           ├── spectrogram_renderer.py
-│           ├── text_renderer.py
-│           ├── ticks_renderer.py
-│           └── time_series_renderer.py
-├── tests/
-├── CONTRIBUTING.md
-├── pyproject.toml
-└── README.md
-```
-
-### 2.3 Planned Live Frequency-Domain View
-
-A future interface will add a live frequency-domain view rendered with ModernGL,
-using the same GPU-based approach as the raw and filtered EMG time-series view.
-The interface will show one selected EMG channel at a time with:
-
-- raw and filtered Welch power spectral density (PSD) curves;
-- an attenuation curve calculated from the filtered and raw PSDs;
-- frequency and decibel axes, a channel selector, and a raw/filtered legend.
-
-The existing filtering path will continue to run only once per snapshot. The raw
-and filtered arrays will then be shared by the time-domain and frequency-domain
-renderers. Welch calculations should be vectorized across channels, performed
-only for new snapshots, and throttled to approximately 5–10 updates per second so
-they do not delay the main Qt/OpenGL render loop. The resulting frequency and
-power values will be uploaded to dynamic ModernGL buffers and drawn as line
-strips using the existing line-shader approach.
-
-The following white-noise measurement is a development reference for the
-current filter configuration at a 250 Hz sampling rate with 50 Hz mains-noise
-removal. The planned live interface should present the same two relationships:
-raw versus filtered PSD and attenuation by frequency.
-
-![Current filter frequency-response reference](docs/diagrams/current-filter-frequency-response.png)
+Report reproducible problems through
+[GitHub Issues](https://github.com/pareeknikhil/emg-gui/issues), including your
+operating system, Python and package versions, and the full error output.
 
 ---
 
-## 3. Contributing
-
-Contributions are welcome! See the [contributing guide](CONTRIBUTING.md) for
-development and linting guidelines.
-
----
-
-## 4. Acknowledgements
+## 5. Acknowledgements
 
 ### 4.1 BrainFlow
 
@@ -195,17 +393,6 @@ The referenced contributions demonstrate text rendering with PyOpenGL and are
 distributed under the
 [CC BY-SA 4.0 License](https://creativecommons.org/licenses/by-sa/4.0/).
 
----
+## Videos
 
-## 5. Tech Debt
-
-1. Add setup and installation instructions to this readme.
-2. Create new repo-emg-ability.
-3. Folder portability use [EMGFlow](https://github.com/WiIIson/EMGFlow-Python-Package/tree/main) & [system path](https://www.youtube.com/watch?v=v6tALyc4C10&t=3s) reference.
-4. Add legends for raw and filtered emg in timeseries renderer.
-5. Processing latency in the performance metrics.
-6. Improve the GUI toggle controls and expose their options in the left sidebar.
-7. Add timer and countdown visualizations.
-8. Move signal processing from the GUI thread to a dedicated processing thread.
-9. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.
-10. Implement the [live ModernGL frequency-domain view](#23-planned-live-frequency-domain-view).
+Watch demos and tutorials on [EMGAbility on YouTube](https://www.youtube.com/@EMGAbility).
