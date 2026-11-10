@@ -243,39 +243,39 @@ and data-source instance to change their settings.
 
 **`OpenBCIConfig`**
 
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| `board_type: OpenBCIBoardType` | Required | Select the board and its sampling rate/channel layout. |
-| `polling_interval_ms: int` | `40` | Interval between data reads; does not change the board's sampling rate. |
-| `turn_off_srb: bool` | `False` | Send SRB-disabling channel commands for a compatible Cyton setup. Leave disabled for other board types. |
-| `serial_port: str` | `""` | Serial device path or COM port. |
-| `ip_address: str` | `""` | Board/network address. |
-| `ip_port: int` | `0` | Network port. |
-| `ip_protocol: int` | `0` | BrainFlow IP protocol value. |
-| `mac_address: str` | `""` | Device MAC address, when required. |
-| `serial_number: str` | `""` | Device serial number, when required. |
-| `timeout: int` | `0` | BrainFlow discovery/connection timeout. |
-| `other_info: str` | `""` | Additional board-specific connection information. |
+| Parameter                      | Default  | Purpose                                                                                                 |
+| ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------- |
+| `board_type: OpenBCIBoardType` | Required | Select the board and its sampling rate/channel layout.                                                  |
+| `polling_interval_ms: int`     | `40`     | Interval between data reads; does not change the board's sampling rate.                                 |
+| `turn_off_srb: bool`           | `False`  | Send SRB-disabling channel commands for a compatible Cyton setup. Leave disabled for other board types. |
+| `serial_port: str`             | `""`     | Serial device path or COM port.                                                                         |
+| `ip_address: str`              | `""`     | Board/network address.                                                                                  |
+| `ip_port: int`                 | `0`      | Network port.                                                                                           |
+| `ip_protocol: int`             | `0`      | BrainFlow IP protocol value.                                                                            |
+| `mac_address: str`             | `""`     | Device MAC address, when required.                                                                      |
+| `serial_number: str`           | `""`     | Device serial number, when required.                                                                    |
+| `timeout: int`                 | `0`      | BrainFlow discovery/connection timeout.                                                                 |
+| `other_info: str`              | `""`     | Additional board-specific connection information.                                                       |
 
 Connection fields are passed directly to BrainFlow. Supply the fields required
 by your board's [connection instructions](https://brainflow.readthedocs.io/en/stable/SupportedBoards.html).
 
 **`OpenBCIBoardType`**
 
-| Connection | Enum members |
-| --- | --- |
-| Serial / dongle | `CYTON_SERIAL`, `CYTON_DAISY_SERIAL`, `GANGLION_DONGLE` |
-| Native Bluetooth | `GANGLION_NATIVE` |
-| Wi-Fi | `CYTON_WIFI`, `CYTON_DAISY_WIFI`, `GANGLION_WIFI` |
-| Generated data | `SYNTHETIC` |
+| Connection       | Enum members                                            |
+| ---------------- | ------------------------------------------------------- |
+| Serial / dongle  | `CYTON_SERIAL`, `CYTON_DAISY_SERIAL`, `GANGLION_DONGLE` |
+| Native Bluetooth | `GANGLION_NATIVE`                                       |
+| Wi-Fi            | `CYTON_WIFI`, `CYTON_DAISY_WIFI`, `GANGLION_WIFI`       |
+| Generated data   | `SYNTHETIC`                                             |
 
 **`PlayBackConfig`**
 
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| `board_type: OpenBCIBoardType` | Required | Board whose sampling rate matches the recording. |
-| `file_path: str` | `""` | Path to the recording; supply an existing file. |
-| `polling_interval_ms: int` | `40` | Playback read interval; samples per read follow the board's sampling rate. |
+| Parameter                      | Default  | Purpose                                                                    |
+| ------------------------------ | -------- | -------------------------------------------------------------------------- |
+| `board_type: OpenBCIBoardType` | Required | Board whose sampling rate matches the recording.                           |
+| `file_path: str`               | `""`     | Path to the recording; supply an existing file.                            |
+| `polling_interval_ms: int`     | `40`     | Playback read interval; samples per read follow the board's sampling rate. |
 
 **`EMGVisualizerWindow.run(logger, board, mains_frequency)`**
 
@@ -315,29 +315,29 @@ playback are not implemented.
 The GUI handles these operations for you. Use them directly when acquiring
 data without the window; avoid concurrent reads while the GUI is streaming.
 
-| Method on `board` | Behavior |
-| --- | --- |
-| `start_stream()` / `stop_stream()` | Start/stop acquisition or playback. Repeating the current state raises `RuntimeError`. |
-| `get_data()` | Return a NumPy array shaped `(EMG channels + 1, samples)`, with markers in the last row. Live reads consume available buffered samples. |
-| `extract_emg_data(data)` | Return only the EMG rows. |
-| `start_recording()` / `stop_recording()` | Enable/disable accumulation; these calls do not read samples or save a file. |
-| `record(data)` | Append a `get_data()` batch while recording is enabled. Call this on each read when working without the GUI. |
-| `insert_start_marker()` / `insert_stop_marker()` | Mark movement start/end with `1.12345` / `2.12345`. |
-| `write_to_csv(datasplit, folder)` | Save accumulated batches to the directory described above and clear them. Requires collected data and an existing directory. |
-| `release()` | Stop a live stream and release its board session. |
+| Method on `board`                                | Behavior                                                                                                                                |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `start_stream()` / `stop_stream()`               | Start/stop acquisition or playback. Repeating the current state raises `RuntimeError`.                                                  |
+| `get_data()`                                     | Return a NumPy array shaped `(EMG channels + 1, samples)`, with markers in the last row. Live reads consume available buffered samples. |
+| `extract_emg_data(data)`                         | Return only the EMG rows.                                                                                                               |
+| `start_recording()` / `stop_recording()`         | Enable/disable accumulation; these calls do not read samples or save a file.                                                            |
+| `record(data)`                                   | Append a `get_data()` batch while recording is enabled. Call this on each read when working without the GUI.                            |
+| `insert_start_marker()` / `insert_stop_marker()` | Mark movement start/end with `1.12345` / `2.12345`.                                                                                     |
+| `write_to_csv(datasplit, folder)`                | Save accumulated batches to the directory described above and clear them. Requires collected data and an existing directory.            |
+| `release()`                                      | Stop a live stream and release its board session.                                                                                       |
 
 Recording and movement methods also raise `RuntimeError` on repeated
 start/stop transitions. On `PlaybackRecording`, `record()`, `write_to_csv()`,
 and `release()` do nothing; movement methods change state without editing file markers.
 
-| Read-only property | Meaning |
-| --- | --- |
-| `emg_channel_count` | Number of EMG channels, excluding the marker channel. |
-| `sampling_rate` | Board sampling rate in Hz. |
-| `polling_interval_ms` | Configured interval between reads. |
-| `is_streaming` | Whether acquisition/playback is started. |
-| `is_recording` | Whether recording is enabled. |
-| `is_active` | Whether a movement interval is active. |
+| Read-only property    | Meaning                                               |
+| --------------------- | ----------------------------------------------------- |
+| `emg_channel_count`   | Number of EMG channels, excluding the marker channel. |
+| `sampling_rate`       | Board sampling rate in Hz.                            |
+| `polling_interval_ms` | Configured interval between reads.                    |
+| `is_streaming`        | Whether acquisition/playback is started.              |
+| `is_recording`        | Whether recording is enabled.                         |
+| `is_active`           | Whether a movement interval is active.                |
 
 `ConsoleLogger()` provides `info(message)`, `error(message)`, and `release()`.
 You may pass your own logger with these three methods. A custom data source
