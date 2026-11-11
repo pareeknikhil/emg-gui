@@ -136,7 +136,7 @@ if __name__ == "__main__":
 | **GUI session controls.** Start and stop streaming and recording separately, and select recording labels directly in the interface. | **Automatic scaling and layout.** Waveforms scale automatically, and channel plots adapt to the window size.                                   |
 | **Playback and hardware-free demos.** Replay compatible recordings, explore bundled samples, or use synthetic data.                 | **Python-configured desktop GUI.** Launch from your own script on Windows, macOS, or Linux.                                                    |
 
-## 4. How does EMG-GUI work ?
+## 4. How EMG-GUI works
 
 See the [architecture guide](docs/architecture.md) for the component overview,
 [directory layout](docs/architecture.md#directory-layout), data flow, and thread
