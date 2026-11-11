@@ -25,13 +25,13 @@ a live spectrogram, with support for recording and playback.
 ## Contents
 
 - [Installation](#1-installation)
-- [Practical Examples](#2-practical-examples)
-- [Configuration](#configuration)
-- [Architecture](#3-architecture)
-- [Contributing](#4-contributing)
+- [Hello World with synthetic data](#2-hello-world-with-synthetic-data)
+- [Features](#3-features)
+- [Architecture](#4-how-emg-gui-works)
+- [Contributing](#5-contributing)
 - [Planned Features](CONTRIBUTING.md#planned-features)
 - [Tech Debt](CONTRIBUTING.md#5-tech-debt)
-- [Acknowledgements](#5-acknowledgements)
+- [Acknowledgements](#6-acknowledgements)
 - [Videos](#videos)
 
 ## 1. Installation
@@ -92,13 +92,10 @@ Choose your operating system and follow the steps in order.
 > **Graphics troubleshooting:** If the application reports an OpenGL context
 > error, check that your graphics driver provides OpenGL 3.3 or later.
 
-## 2. Hello World with synthetic data!
+## 2. Hello world with synthetic data
 
 Each script opens raw and filtered EMG traces alongside a live spectrogram.
 Run it with Python, then click **Stream Data** to begin. Close the window to exit.
-
-- [Synthetic data](#synthetic-data): try the interface without hardware.
-
 
 [Source: examples/synthetic_board.py](examples/synthetic_board.py)
 
