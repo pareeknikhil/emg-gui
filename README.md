@@ -62,7 +62,7 @@ Choose your operating system and follow the steps in order.
 
 </details>
 
-<details open>
+<details>
 <summary><strong>🐧 Linux — Ubuntu / Debian</strong></summary>
 
 1. **Install the system dependencies.** For Debian and Ubuntu:
@@ -92,17 +92,13 @@ Choose your operating system and follow the steps in order.
 > **Graphics troubleshooting:** If the application reports an OpenGL context
 > error, check that your graphics driver provides OpenGL 3.3 or later.
 
-## 2. Practical Examples
+## 2. Hello World with synthetic data!
 
 Each script opens raw and filtered EMG traces alongside a live spectrogram.
 Run it with Python, then click **Stream Data** to begin. Close the window to exit.
 
 - [Synthetic data](#synthetic-data): try the interface without hardware.
-- [OpenBCI Cyton](#openbci-cyton): connect a serial board.
-- [Playback](#playback): view a bundled or personal recording.
-- [Configuration](#configuration): board types, connection options, and mains frequency.
 
-### Synthetic data
 
 [Source: examples/synthetic_board.py](examples/synthetic_board.py)
 
@@ -132,156 +128,24 @@ if __name__ == "__main__":
     main()
 ```
 
-### OpenBCI Cyton
+## 3. Features
 
-[Source: examples/cyton_board.py](examples/cyton_board.py)
+| Explore and record                                                                                                                  | Design and integration                                                                                                                         |
+| :---------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Live multichannel EMG.** Compare raw and filtered waveforms together on a shared per-channel scale.                               | **Independent acquisition.** Sensor polling and raw-data recording run on a worker thread, separate from visualization.                        |
+| **Per-channel spectrograms.** Observe changing frequency content alongside each channel’s waveform.                                 | **Self-paced visualization.** Display the latest snapshot without queuing outdated frames or reprocessing unchanged snapshots while streaming. |
+| **Built-in filtering.** Bandpass filtering with selectable 50 Hz or 60 Hz mains-noise suppression.                                  | **GPU-accelerated rendering.** ModernGL renders waveforms, spectrograms, axes, and labels.                                                     |
+| **Recording and movement markers.** Save raw EMG with movement start/stop markers, organized by activity and dataset split.         | **OpenBCI support.** Configure Cyton, Cyton Daisy, or Ganglion, with channel counts and sampling rates taken from the selected board.          |
+| **GUI session controls.** Start and stop streaming and recording separately, and select recording labels directly in the interface. | **Automatic scaling and layout.** Waveforms scale automatically, and channel plots adapt to the window size.                                   |
+| **Playback and hardware-free demos.** Replay compatible recordings, explore bundled samples, or use synthetic data.                 | **Python-configured desktop GUI.** Launch from your own script on Windows, macOS, or Linux.                                                    |
 
-Set `serial_port` in the example below to your board's port:
-
-- **macOS:** use `/dev/cu.*`, such as `/dev/cu.usbserial-…`.
-- **Windows:** use the assigned COM port, such as `COM3`.
-- **Ubuntu / Debian:** use `/dev/ttyUSB0` or `/dev/ttyACM0`. To grant serial-port
-  access, run the following, then sign out and back in:
-
-  ```bash
-  sudo usermod -aG dialout "$USER"
-  ```
-
-```python
-from emg_gui import (
-    ConsoleLogger, EMGVisualizerWindow, MainsFrequency,
-    OpenBCIBoard, OpenBCIBoardType, OpenBCIConfig,
-)
-
-
-def main():
-    logger = ConsoleLogger()
-    board = None
-    try:
-        config = OpenBCIConfig(
-            board_type=OpenBCIBoardType.CYTON_SERIAL,
-            serial_port="/dev/ttyUSB0",
-            polling_interval_ms=40,
-            turn_off_srb=True,
-        )
-        board = OpenBCIBoard(logger=logger, config=config)
-        EMGVisualizerWindow.run(
-            logger=logger, board=board, mains_frequency=MainsFrequency.FIFTY_HZ
-        )
-    finally:
-        if board is not None:
-            board.release()
-        logger.release()
-
-
-if __name__ == "__main__":
-    main()
-```
-
-### Playback
-
-[Source: examples/playback_recording.py](examples/playback_recording.py)
-
-No board connection is needed. Set `board_type` to the board used for the
-recording; it determines the playback sampling rate. The bundled example uses `SYNTHETIC`.
-
-```python
-from importlib.resources import files
-
-from emg_gui import (
-    ConsoleLogger, EMGVisualizerWindow, MainsFrequency,
-    OpenBCIBoardType, PlayBackConfig, PlaybackRecording,
-)
-
-
-def main():
-    logger = ConsoleLogger()
-    board = None
-    try:
-        recording = files("emg_gui.data") / "train" / "top_fist" / "file_1.csv"
-        # For your own recording, use its path instead:
-        # recording = "/home/user/recordings/session.csv"
-        config = PlayBackConfig(
-            board_type=OpenBCIBoardType.SYNTHETIC,
-            file_path=str(recording),
-            polling_interval_ms=40,
-        )
-        board = PlaybackRecording(logger=logger, config=config)
-        EMGVisualizerWindow.run(
-            logger=logger, board=board, mains_frequency=MainsFrequency.FIFTY_HZ
-        )
-    finally:
-        if board is not None:
-            board.release()
-        logger.release()
-
-
-if __name__ == "__main__":
-    main()
-```
-
-**File format:** numeric, tab-separated rows without a header. Each row is one
-sample; columns contain EMG channels followed by one marker column. Use zeros
-in the marker column when there are no markers. Relative paths resolve from
-your working directory. Playback outputs zeros after the last sample; stop and
-restart streaming to replay from the beginning.
-
-### Configuration
-
-`OpenBCIConfig` and `PlayBackConfig` are immutable. Create a new configuration
-and data-source instance to change their settings.
-
-**`OpenBCIConfig`**
-
-| Parameter                      | Default  | Purpose                                                                                                 |
-| ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------- |
-| `board_type: OpenBCIBoardType` | Required | Select the board and its sampling rate/channel layout.                                                  |
-| `polling_interval_ms: int`     | `40`     | Interval between data reads; does not change the board's sampling rate.                                 |
-| `turn_off_srb: bool`           | `False`  | Send SRB-disabling channel commands for a compatible Cyton setup. Leave disabled for other board types. |
-| `serial_port: str`             | `""`     | Serial device path or COM port.                                                                         |
-| `ip_address: str`              | `""`     | Board/network address.                                                                                  |
-| `ip_port: int`                 | `0`      | Network port.                                                                                           |
-| `ip_protocol: int`             | `0`      | BrainFlow IP protocol value.                                                                            |
-| `mac_address: str`             | `""`     | Device MAC address, when required.                                                                      |
-| `serial_number: str`           | `""`     | Device serial number, when required.                                                                    |
-| `timeout: int`                 | `0`      | BrainFlow discovery/connection timeout.                                                                 |
-| `other_info: str`              | `""`     | Additional board-specific connection information.                                                       |
-
-Connection fields are passed directly to BrainFlow. Supply the fields required
-by your board's [connection instructions](https://brainflow.readthedocs.io/en/stable/SupportedBoards.html).
-
-**`OpenBCIBoardType`**
-
-| Connection       | Enum members                                            |
-| ---------------- | ------------------------------------------------------- |
-| Serial / dongle  | `CYTON_SERIAL`, `CYTON_DAISY_SERIAL`, `GANGLION_DONGLE` |
-| Native Bluetooth | `GANGLION_NATIVE`                                       |
-| Wi-Fi            | `CYTON_WIFI`, `CYTON_DAISY_WIFI`, `GANGLION_WIFI`       |
-| Generated data   | `SYNTHETIC`                                             |
-
-**`PlayBackConfig`**
-
-| Parameter                      | Default  | Purpose                                                                    |
-| ------------------------------ | -------- | -------------------------------------------------------------------------- |
-| `board_type: OpenBCIBoardType` | Required | Board whose sampling rate matches the recording.                           |
-| `file_path: str`               | `""`     | Path to the recording; supply an existing file.                            |
-| `polling_interval_ms: int`     | `40`     | Playback read interval; samples per read follow the board's sampling rate. |
-
-**`EMGVisualizerWindow.run(logger, board, mains_frequency)`**
-
-Pass a `ConsoleLogger`, an `OpenBCIBoard` or `PlaybackRecording`, and either
-`MainsFrequency.FIFTY_HZ` or `MainsFrequency.SIXTY_HZ` for mains-noise removal.
-Use the enum members, not the numbers `50` or `60`. This call creates the Qt
-application and blocks until the window closes. Run it on the main thread;
-release the board and logger afterwards, as shown above.
-
-## 3. Architecture
+## 4. How does EMG-GUI work ?
 
 See the [architecture guide](docs/architecture.md) for the component overview,
 [directory layout](docs/architecture.md#directory-layout), data flow, and thread
 interactions.
 
-## 4. Contributing
+## 5. Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the development and linting workflow,
 [planned features](CONTRIBUTING.md#planned-features), and
@@ -293,9 +157,9 @@ operating system, Python and package versions, and the full error output.
 
 ---
 
-## 5. Acknowledgements
+## 6. Acknowledgements
 
-### 5.1 BrainFlow
+### 6.1 BrainFlow
 
 This project uses [BrainFlow](https://brainflow.readthedocs.io/en/stable/) for
 biosignal acquisition and hardware integration. BrainFlow provides a uniform
@@ -304,7 +168,7 @@ data across a wide range of supported boards, including OpenBCI devices.
 BrainFlow is distributed under the
 [MIT License](https://github.com/brainflow-dev/brainflow/blob/master/LICENSE).
 
-### 5.2 ModernGL Spectrogram
+### 6.2 ModernGL Spectrogram
 
 This project uses
 [nickcercone/spectrogram](https://github.com/nickcercone/spectrogram) as a
@@ -313,7 +177,7 @@ referenced project demonstrates real-time audio spectrogram visualization
 using ModernGL and is distributed under the
 [MIT License](https://github.com/nickcercone/spectrogram/blob/main/LICENCE).
 
-### 5.3 Text Rendering
+### 6.3 Text Rendering
 
 This project adapts the code in
 [How to render text with PyOpenGL?](https://stackoverflow.com/questions/63836707/how-to-render-text-with-pyopengl)
