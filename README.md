@@ -29,8 +29,8 @@ a live spectrogram, with support for recording and playback.
 - [Features](#3-features)
 - [Architecture](#4-how-emg-gui-works)
 - [Contributing](#5-contributing)
-- [Planned Features](CONTRIBUTING.md#planned-features)
-- [Tech Debt](CONTRIBUTING.md#tech-debt)
+- [Planned Features](https://github.com/pareeknikhil/emg-gui/blob/main/CONTRIBUTING.md#planned-features)
+- [Tech Debt](https://github.com/pareeknikhil/emg-gui/blob/main/CONTRIBUTING.md#tech-debt)
 - [Acknowledgements](#6-acknowledgements)
 - [Videos](#videos)
 
@@ -97,7 +97,7 @@ Choose your operating system and follow the steps in order.
 Each script opens raw and filtered EMG traces alongside a live spectrogram.
 Run it with Python, then click **Stream Data** to begin. Close the window to exit.
 
-[Source: examples/synthetic_board.py](examples/synthetic_board.py)
+[Source: examples/synthetic_board.py](https://github.com/pareeknikhil/emg-gui/blob/main/examples/synthetic_board.py)
 
 ```python
 from emg_gui import (
@@ -137,15 +137,15 @@ if __name__ == "__main__":
 
 ## 4. How EMG-GUI works
 
-See the [architecture guide](docs/architecture.md) for the component overview,
-[directory layout](docs/architecture.md#directory-layout), data flow, and thread
+See the [architecture guide](https://github.com/pareeknikhil/emg-gui/blob/main/docs/architecture.md) for the component overview,
+[component hierarchy](https://github.com/pareeknikhil/emg-gui/blob/main/docs/architecture.md#component-hierarchy), data flow, and thread
 interactions.
 
 ## 5. Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the development and linting workflow,
-[planned features](CONTRIBUTING.md#planned-features), and
-[tech debt](CONTRIBUTING.md#tech-debt).
+Contributions are welcome! See [CONTRIBUTING.md](https://github.com/pareeknikhil/emg-gui/blob/main/CONTRIBUTING.md) for the development and linting workflow,
+[planned features](https://github.com/pareeknikhil/emg-gui/blob/main/CONTRIBUTING.md#planned-features), and
+[tech debt](https://github.com/pareeknikhil/emg-gui/blob/main/CONTRIBUTING.md#tech-debt).
 
 Report reproducible problems through
 [GitHub Issues](https://github.com/pareeknikhil/emg-gui/issues), including your
