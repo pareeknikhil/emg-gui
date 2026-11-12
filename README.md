@@ -127,14 +127,13 @@ if __name__ == "__main__":
 
 ## 3. Features
 
-| Explore and record                                                                                                                  | Design and integration                                                                                                                         |
-| :---------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Live multichannel EMG.** Compare raw and filtered waveforms together on a shared per-channel scale.                               | **Automatic scaling and layout.** Waveforms scale automatically, and channel plots adapt to the window size.                                   |
-| **Per-channel spectrograms.** Observe changing frequency content alongside each channel’s waveform.                                 | **GPU-accelerated rendering.** ModernGL renders waveforms, spectrograms, axes, and labels.                                                     |
-| **Recording and movement markers.** Save raw EMG with movement start/stop markers in CSV format.                                    | **Python-configured desktop GUI.** Launch from your own script on Windows, macOS, or Linux.                        |
-| **Playback and hardware-free demos.** Replay compatible recordings, explore bundled samples, or use synthetic data.                 | **Independent acquisition.** Sensor polling and raw-data recording run on a worker thread, separate from visualization.          |
+| Explore and record                                                                                                                    | Design and integration                                                                                                                         |
+| :------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Live multichannel EMG.** Compare raw and filtered waveforms together on a shared per-channel scale.                                 | **Automatic scaling and layout.** Waveforms scale automatically, and channel plots adapt to the window size.                                   |
+| **Per-channel spectrograms.** Observe changing frequency content alongside each channel’s waveform.                                   | **GPU-accelerated rendering.** ModernGL renders waveforms, spectrograms, axes, and labels.                                                     |
+| **Recording and movement markers.** Save raw EMG with movement start/stop markers in CSV format.                                      | **Python-configured desktop GUI.** Launch from your own script on Windows, macOS, or Linux.                                                    |
+| **Playback and hardware-free demos.** Replay compatible recordings, explore bundled samples, or use synthetic data.                   | **Independent acquisition.** Sensor polling and raw-data recording run on a worker thread, separate from visualization.                        |
 | **OpenBCI support.** Configure Cyton, Cyton Daisy, or Ganglion, with channel counts and sampling rates taken from the selected board. | **Self-paced visualization.** Display the latest snapshot without queuing outdated frames or reprocessing unchanged snapshots while streaming. |
-
 
 ## 4. How EMG-GUI works
 
