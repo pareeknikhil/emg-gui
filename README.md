@@ -30,7 +30,7 @@ a live spectrogram, with support for recording and playback.
 - [Architecture](#4-how-emg-gui-works)
 - [Contributing](#5-contributing)
 - [Planned Features](CONTRIBUTING.md#planned-features)
-- [Tech Debt](CONTRIBUTING.md#5-tech-debt)
+- [Tech Debt](CONTRIBUTING.md#tech-debt)
 - [Acknowledgements](#6-acknowledgements)
 - [Videos](#videos)
 
@@ -127,14 +127,13 @@ if __name__ == "__main__":
 
 ## 3. Features
 
-| Explore and record                                                                                                                  | Design and integration                                                                                                                         |
-| :---------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Live multichannel EMG.** Compare raw and filtered waveforms together on a shared per-channel scale.                               | **Independent acquisition.** Sensor polling and raw-data recording run on a worker thread, separate from visualization.                        |
-| **Per-channel spectrograms.** Observe changing frequency content alongside each channel’s waveform.                                 | **Self-paced visualization.** Display the latest snapshot without queuing outdated frames or reprocessing unchanged snapshots while streaming. |
-| **Built-in filtering.** Bandpass filtering with selectable 50 Hz or 60 Hz mains-noise suppression.                                  | **GPU-accelerated rendering.** ModernGL renders waveforms, spectrograms, axes, and labels.                                                     |
-| **Recording and movement markers.** Save raw EMG with movement start/stop markers, organized by activity and dataset split.         | **OpenBCI support.** Configure Cyton, Cyton Daisy, or Ganglion, with channel counts and sampling rates taken from the selected board.          |
-| **GUI session controls.** Start and stop streaming and recording separately, and select recording labels directly in the interface. | **Automatic scaling and layout.** Waveforms scale automatically, and channel plots adapt to the window size.                                   |
-| **Playback and hardware-free demos.** Replay compatible recordings, explore bundled samples, or use synthetic data.                 | **Python-configured desktop GUI.** Launch from your own script on Windows, macOS, or Linux.                                                    |
+| Explore and record                                                                                                                    | Design and integration                                                                                                                         |
+| :------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Live multichannel EMG.** Compare raw and filtered waveforms together on a shared per-channel scale.                                 | **Automatic scaling and layout.** Waveforms scale automatically, and channel plots adapt to the window size.                                   |
+| **Per-channel spectrograms.** Observe changing frequency content alongside each channel’s waveform.                                   | **GPU-accelerated rendering.** ModernGL renders waveforms, spectrograms, axes, and labels.                                                     |
+| **Recording and movement markers.** Save raw EMG with movement start/stop markers in CSV format.                                      | **Python-configured desktop GUI.** Launch from your own script on Windows, macOS, or Linux.                                                    |
+| **Playback and hardware-free demos.** Replay compatible recordings, explore bundled samples, or use synthetic data.                   | **Independent acquisition.** Sensor polling and raw-data recording run on a worker thread, separate from visualization.                        |
+| **OpenBCI support.** Configure Cyton, Cyton Daisy, or Ganglion, with channel counts and sampling rates taken from the selected board. | **Self-paced visualization.** Display the latest snapshot without queuing outdated frames or reprocessing unchanged snapshots while streaming. |
 
 ## 4. How EMG-GUI works
 
@@ -146,7 +145,7 @@ interactions.
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the development and linting workflow,
 [planned features](CONTRIBUTING.md#planned-features), and
-[tech debt](CONTRIBUTING.md#5-tech-debt).
+[tech debt](CONTRIBUTING.md#tech-debt).
 
 Report reproducible problems through
 [GitHub Issues](https://github.com/pareeknikhil/emg-gui/issues), including your
