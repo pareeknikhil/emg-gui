@@ -137,9 +137,9 @@ if __name__ == "__main__":
 
 ## 4. How EMG-GUI works
 
-See the [architecture guide](https://github.com/pareeknikhil/emg-gui/blob/main/docs/architecture.md) for the component overview,
-[component hierarchy](https://github.com/pareeknikhil/emg-gui/blob/main/docs/architecture.md#component-hierarchy), data flow, and thread
-interactions.
+See the [user guide](https://github.com/pareeknikhil/emg-gui/blob/main/docs/user_guide.md)
+for examples, public API options, and the
+[architecture overview](https://github.com/pareeknikhil/emg-gui/blob/main/docs/user_guide.md#3-architecture-overview).
 
 ## 5. Contributing
 
