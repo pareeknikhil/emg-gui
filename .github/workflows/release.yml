@@ -102,6 +102,34 @@ jobs:
         env:
           NEEDS_VERSION_OUTPUTS_NEW_VERSION: ${{ needs.Version.outputs.new_version }}
 
+      - name: Prepare README for PyPI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          readme = Path("README.md")
+
+          original = (
+              "https://raw.githubusercontent.com/pareeknikhil/"
+              "emg-gui/main/docs/diagrams/emg-preview.webp"
+          )
+
+          optimized = (
+              "https://raw.githubusercontent.com/pareeknikhil/"
+              "emg-gui/main/docs/diagrams/emg-preview-small.webp"
+          )
+
+          content = readme.read_text(encoding="utf-8")
+
+          if original not in content:
+              raise SystemExit("Original animation URL not found")
+
+          readme.write_text(
+              content.replace(original, optimized),
+              encoding="utf-8",
+          )
+          PY
+
       - name: Build source and wheel distribution
         run: |
           poetry build
@@ -132,7 +160,7 @@ jobs:
 
   Github-Release:
     name: Create GitHub Release
-    needs: [Build-with-Poetry, Version]
+    needs: [PyPi-Publish, Version]
     runs-on: ubuntu-latest
     permissions:
       contents: write
