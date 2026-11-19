@@ -1,7 +1,7 @@
 [project]
 name = "emg-gui"
 version = "0.1.0"
-description = ""
+description = "Real-time acquisition and visualization of OpenBCI EMG signals with Python."
 authors = [
     {name = "Nikhil Pareek", email = "nikhilpareek149@gmail.com"}
 ]

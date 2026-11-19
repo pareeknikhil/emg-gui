@@ -1,6 +1,7 @@
 import sys
 import time
 from dataclasses import dataclass
+from importlib.resources import files
 from typing import Protocol
 
 import numpy as np
@@ -188,7 +189,7 @@ class OpenBCIBoard:
         self._recording_state = RecordingState.IDLE
 
     def record(self, data) -> None:
-        if self.is_recording:
+        if self.is_recording and data.size > 0:
             self._emg_recording.append(data)
 
     def insert_start_marker(self) -> None:
@@ -217,12 +218,19 @@ class OpenBCIBoard:
         return emg_data
 
     def write_to_csv(self, datasplit: str, folder: str) -> None:
+        if not self._emg_recording:
+            self._logger.error("DATASOURCE: No recording data to save")
+            return
         emg_numpy = np.concatenate(self._emg_recording, axis=1)
-        file_path = f"data/{datasplit}/{folder}/{str(int(time.time()))}__{folder}.csv"
-        DataFilter.write_file(data=emg_numpy, file_name=file_path, file_mode="w")
+
+        data_directory = files("emg_gui.data") / datasplit / folder
+        if not data_directory.is_dir():
+            raise FileNotFoundError("Recording directory does not exist")
+        file_path = data_directory / f"{int(time.time())}__{folder}.csv"
+        DataFilter.write_file(data=emg_numpy, file_name=str(file_path), file_mode="w")
         file_ds = get_all_files(
-            pattern=f"data/{datasplit}/{folder}/*.csv", shuffle_flag=False
-        )  # hard-coded: [TECH DEBT]
+            pattern=f"{data_directory}/*.csv", shuffle_flag=False
+        )
         self._logger.info(
             f"DATASOURCE: File written @ {file_path} (Total files: {sum(1 for _ in file_ds)})"
         )

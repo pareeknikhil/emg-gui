@@ -23,7 +23,7 @@ installing `emg-gui`.
 
 #### Synthetic board
 
-Run without hardware using BrainFlow-generated signals. Click **Stream Data**
+Run without hardware using BrainFlow-generated signals. Click **Start**
 in the GUI to start. Each channel shows raw and filtered waveforms alongside
 its spectrogram.
 
@@ -170,18 +170,19 @@ recordings or insert markers into the file.
 
 ### GUI Controls
 
-- **Stream Data / Streaming:** start or stop acquisition or playback.
+- **Start / Stop:** start or stop acquisition or playback.
 - **Record / Recording:** start recording, then click again to save the CSV.
   Select a dataset split and recording folder first.
-- **Start Movement / Stop Movement:** insert movement markers while streaming;
-  record at the same time to save those markers.
+- **Mark Start / Mark End:** insert markers `1.12345` (start) and
+  `2.12345` (stop) while streaming. Record at the same time to save them
+  in the CSV's final column.
 - **Reset:** clear the acquisition display buffer. Full waveform and
   spectrogram reset is not yet connected; see [limitations](#4-current-limitations).
 
 For board recordings, files are saved under
-`data/<split>/<folder>/<timestamp>__<folder>.csv`, relative to where you run
-Python. Ensure the destination directory exists. Stop recording before closing
-the window; closing does not automatically save an active recording.
+`emg_gui/data/<split>/<folder>/<timestamp>__<folder>.csv` inside the installed
+package, using the existing dataset and activity directories. Stop recording
+before closing the window; closing does not automatically save an active recording.
 
 ---
 
