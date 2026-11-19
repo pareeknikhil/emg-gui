@@ -90,13 +90,12 @@ raw versus filtered PSD and attenuation by frequency.
 ## Tech Debt
 
 1. Add automatic ports detection script or options
-2. Create new repo-emg-ability.
-3. Folder portability use [EMGFlow](https://github.com/WiIIson/EMGFlow-Python-Package/tree/main) & [system path](https://www.youtube.com/watch?v=v6tALyc4C10&t=3s) reference.
-4. Add legends for raw and filtered emg in timeseries renderer.
-5. Processing latency in the performance metrics.
-6. Add test coverage.
-7. Improve the GUI toggle controls and expose their options in the left sidebar.
-8. Add timer and countdown visualizations.
-9. Move signal processing from the GUI thread to a dedicated processing thread.
-10. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.
-11. Implement the [live ModernGL frequency-domain view](#live-frequency-domain-view).
+2. Change repository name: emg-ability -> emg-gui
+3. Add legends for raw and filtered emg in timeseries renderer.
+4. Processing latency in the performance metrics.
+5. Add test coverage.
+6. Improve the GUI toggle controls and expose their options in the left sidebar.
+7. Add timer and countdown visualizations.
+8. Move signal processing from the GUI thread to a dedicated processing thread.
+9. Move the complete data-source lifecycle into the sensor thread, including initialization, streaming, recording, stopping, and release.
+10. Implement the [live ModernGL frequency-domain view](#live-frequency-domain-view).

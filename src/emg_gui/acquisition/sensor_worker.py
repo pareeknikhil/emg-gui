@@ -65,12 +65,12 @@ class SensorWorker(QObject):
             self._ring_buffer.extend(self._zero_window)
             self._latest_snapshot = self._zero_window.T.copy(order="C")
             self._board.stop_stream()
-            self.stream_changed.emit("Stream")
+            self.stream_changed.emit("Start")
             return
 
         self._board.start_stream()
         self._sensor_timer.start()
-        self.stream_changed.emit("Streaming")
+        self.stream_changed.emit("Stop")
 
     @pyqtSlot()
     def shutdown_timer(self) -> None:
@@ -93,11 +93,11 @@ class SensorWorker(QObject):
     def marker(self) -> None:
         if self._board.is_active:
             self._board.insert_stop_marker()
-            self.marker_changed.emit("Start Movement")
+            self.marker_changed.emit("Mark Start")
             return
 
         self._board.insert_start_marker()
-        self.marker_changed.emit("Stop Movement")
+        self.marker_changed.emit("Mark End")
 
     @pyqtSlot()
     def reset(self) -> None:
