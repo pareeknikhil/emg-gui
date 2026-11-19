@@ -228,9 +228,7 @@ class OpenBCIBoard:
             raise FileNotFoundError("Recording directory does not exist")
         file_path = data_directory / f"{int(time.time())}__{folder}.csv"
         DataFilter.write_file(data=emg_numpy, file_name=str(file_path), file_mode="w")
-        file_ds = get_all_files(
-            pattern=f"{data_directory}/*.csv", shuffle_flag=False
-        )
+        file_ds = get_all_files(pattern=f"{data_directory}/*.csv", shuffle_flag=False)
         self._logger.info(
             f"DATASOURCE: File written @ {file_path} (Total files: {sum(1 for _ in file_ds)})"
         )

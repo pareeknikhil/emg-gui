@@ -90,7 +90,7 @@ raw versus filtered PSD and attenuation by frequency.
 ## Tech Debt
 
 1. Add automatic ports detection script or options
-2. Change repo name: emg-ability -> emg-gui
+2. Change repository name: emg-ability -> emg-gui
 3. Add legends for raw and filtered emg in timeseries renderer.
 4. Processing latency in the performance metrics.
 5. Add test coverage.
